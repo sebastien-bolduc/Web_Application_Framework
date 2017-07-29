@@ -7,8 +7,6 @@
 
 JSXna.Utils.include['AJAX']('/JSXna/Framework/Game.js');
 JSXna.Utils.include['AJAX']('/JSXna/Framework/GraphicsDeviceManager.js');
-JSXna.Utils.include['AJAX']('/JSXna/Framework/Input/Mouse.js');
-JSXna.Utils.include['AJAX']('/JSXna/Framework/Rectangle.js');
 
 /**
  * My namespace for the application.
@@ -36,11 +34,6 @@ MyFirstApplication.Game1 = class extends JSXna.Framework.Game {
         this.x1 = -0.5; this.x2 = 0.5;
         this.y1 = -0.5; this.y2 = 0.5;
         this.xSpeed = 0.5; this.ySpeed = 0.15;
-        
-        this.mouseInput = undefined;
-        this.rectangle = undefined;
-        this.mousePointer = undefined;
-        this.intersectsFlag = false;
     }
     
     /**
@@ -53,11 +46,6 @@ MyFirstApplication.Game1 = class extends JSXna.Framework.Game {
         // TODO: Add your initialization logic here
         var gl = this.graphics.GraphicsDevice.Adapter.DefaultAdapter;
         this.positionBuffer = gl.createBuffer();
-        this.mouseInput = new JSXna.Framework.Input.Mouse();
-        
-        // Create our 2D bounding box...
-        this.rectangle = new JSXna.Framework.Rectangle(this.x1, this.y1, 1, 1);
-        this.mousePointer = new JSXna.Framework.Rectangle(0, 0, 0.001, 0.001);
         
         super.initialize();  //This is the function we override in the parent.
     }
@@ -89,67 +77,40 @@ MyFirstApplication.Game1 = class extends JSXna.Framework.Game {
     update(gameTime) {
         var gl = this.graphics.GraphicsDevice.Adapter.DefaultAdapter;
         
-        // .. and update our 2D bounding box.
-        this.rectangle.X = this.x1;
-        this.rectangle.Y = this.y1;
-        this.mousePointer.X = (this.mouseInput.GetState.X / 320) - 1;
-        this.mousePointer.Y = -((this.mouseInput.GetState.Y / 240) - 1);
+        // ---------------------------------------------------------------------
+        var elapsedGameTime = gameTime.ElapsedGameTime.totalSeconds;
+        this.x1 += this.xSpeed * elapsedGameTime; this.x2 += this.xSpeed * elapsedGameTime;
+        this.y1 += this.ySpeed * elapsedGameTime; this.y2 += this.ySpeed * elapsedGameTime;
         
-        if (this.mouseInput.GetState.LeftButton || this.mouseInput.GetState.RightButton) {
-            // Check to see if we click the rectangle and update is position according to the mouse pointer.
-            if (this.mousePointer.intersects(this.rectangle) || this.intersectsFlag) {
-                this.x1 = this.mousePointer.Left - 0.5;
-                this.x2 = (this.x1 + 1);
-                this.y2 = this.mousePointer.Top + 0.5;
-                this.y1 = this.y2 - 1;
-                this.intersectsFlag = true;
-            }
-        } else {
-            this.intersectsFlag = false;
-            // ---------------------------------------------------------------------
-            var elapsedGameTime = gameTime.ElapsedGameTime.totalSeconds;
-            this.x1 += this.xSpeed * elapsedGameTime;
-            this.x2 += this.xSpeed * elapsedGameTime;
-            this.y1 += this.ySpeed * elapsedGameTime;
-            this.y2 += this.ySpeed * elapsedGameTime;
+        if (this.x2 > 1) {
+            this.xSpeed *= -1;
+            this.x1 = 0; this.x2 = 1;
+        } else if (this.x1 < -1) {
+            this.xSpeed *= -1;
+            this.x1 = -1; this.x2 = 0;
+        }
         
-            if (this.x2 > 1) {
-                this.xSpeed *= -1;
-                this.x1 = 0;
-                this.x2 = 1;
-            }
-            else if (this.x1 < -1) {
-                this.xSpeed *= -1;
-                this.x1 = -1;
-                this.x2 = 0;
-            }
-        
-            if (this.y2 > 1) {
-                this.ySpeed *= -1;
-                this.y1 = 0;
-                this.y2 = 1;
-            }
-            else if (this.y1 < -1) {
-                this.ySpeed *= -1;
-                this.y1 = -1;
-                this.y2 = 0;
-            }
-            // ---------------------------------------------------------------------
+        if (this.y2 > 1) {
+            this.ySpeed *= -1;
+            this.y1 = 0; this.y2 = 1;
+        } else if (this.y1 < -1) {
+            this.ySpeed *= -1;
+            this.y1 = -1; this.y2 = 0;
         }
         
         var vertices = [this.x1, this.y2,
-            this.x1, this.y1,
-            this.x2, this.y2,
-            this.x2, this.y2,
-            this.x1, this.y1,
-            this.x2, this.y1
-        ];
+                        this.x1, this.y1,
+                        this.x2, this.y2,
+                        this.x2, this.y2,
+                        this.x1, this.y1,
+                        this.x2, this.y1];
+        // ---------------------------------------------------------------------
         
         gl.enableVertexAttribArray(this.positionLocation);
         gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
         
-        super.update(gameTime); //This is the function we override in the parent.
+        super.update(gameTime);  //This is the function we override in the parent.
     }
     
     /**
