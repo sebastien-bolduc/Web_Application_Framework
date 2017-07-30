@@ -1,3 +1,5 @@
+var includeJSXnaRectangleFlag = (typeof includeJSXnaRectangleFlag == "undefined") ? false : includeJSXnaRectangleFlag;
+
 /**
  * Defines a rectangle.
  *
@@ -88,3 +90,8 @@ JSXna.Framework.Rectangle = class {
         return false;
     }
 };
+
+if (!includeJSXnaRectangleFlag) {
+    JSXnaLoadingStatus += 1;   
+    includeJSXnaRectangleFlag = true;
+}

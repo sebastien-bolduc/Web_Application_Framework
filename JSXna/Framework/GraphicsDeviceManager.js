@@ -1,3 +1,5 @@
+var includeJSXnaGraphicsDeviceManagerFlag = (typeof includeJSXnaGraphicsDeviceManagerFlag == "undefined") ? false : includeJSXnaGraphicsDeviceManagerFlag;
+
 /**
  * Handles the configuration and management of the graphics device.
  *
@@ -5,7 +7,7 @@
  * @version 0.1
  */
 
-JSXna.Utils.include['AJAX']('/JSXna/Framework/Graphics/GraphicsDevice.js');
+JSXna.Utils.include['HTML']('/JSXna/Framework/Graphics/GraphicsDevice.js');
 
 /**
  * My namespace for graphic device manager.
@@ -41,3 +43,8 @@ JSXna.Framework.GraphicsDeviceManager = class {
         return this._graphicsDevice;
     }
 };
+
+if (!includeJSXnaGraphicsDeviceManagerFlag) {
+    JSXnaLoadingStatus += 1;   
+    includeJSXnaGraphicsDeviceManagerFlag = true;
+}

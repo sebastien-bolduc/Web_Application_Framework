@@ -1,3 +1,5 @@
+var includeJSXnaMouseStateFlag = (typeof includeJSXnaMouseStateFlag == "undefined") ? false : includeJSXnaMouseStateFlag;
+
 /**
  * Represents the state of a mouse input device, including mouse cursor position 
  * and buttons pressed.
@@ -134,3 +136,8 @@ JSXna.Framework.Input.MouseState = class {
         return this._rightButton;
     }
 };
+
+if (!includeJSXnaMouseStateFlag) {
+    JSXnaLoadingStatus += 1;   
+    includeJSXnaMouseStateFlag = true;
+}

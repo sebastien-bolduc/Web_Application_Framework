@@ -1,3 +1,5 @@
+var includeJSXnaGraphicsAdapterFlag = (typeof includeJSXnaGraphicsAdapterFlag == "undefined") ? false : includeJSXnaGraphicsAdapterFlag;
+
 /**
  * Provides methods to retrieve and manipulate graphics adapters.
  *
@@ -61,3 +63,8 @@ JSXna.Framework.Graphics.GraphicsAdapter = class {
         return this._WebGLcontext;
     }
 };
+
+if (!includeJSXnaGraphicsAdapterFlag) {
+    JSXnaLoadingStatus += 1;   
+    includeJSXnaGraphicsAdapterFlag = true;
+}

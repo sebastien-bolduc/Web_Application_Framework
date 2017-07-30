@@ -1,3 +1,5 @@
+var includeJSXnaGameTimeFlag = (typeof includeJSXnaGameTimeFlag == "undefined") ? false : includeJSXnaGameTimeFlag;
+
 /**
  * Snapshot of the game timing state expressed in values that can be used by 
  * variable-step (real time) or fixed-step (game time) games.
@@ -56,3 +58,8 @@ JSXna.Framework.GameTime = class {
         return this.elapsedGameTime;
     }
 };
+
+if (!includeJSXnaGameTimeFlag) {
+    JSXnaLoadingStatus += 1;   
+    includeJSXnaGameTimeFlag = true;
+}

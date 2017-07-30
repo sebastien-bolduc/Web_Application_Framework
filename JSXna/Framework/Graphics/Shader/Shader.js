@@ -1,3 +1,5 @@
+var includeJSXnaShaderFlag = (typeof includeJSXnaShaderFlag == "undefined") ? false : includeJSXnaShaderFlag;
+
 /**
  * Take care of everything that is shader related.
  *
@@ -66,3 +68,8 @@ JSXna.Framework.Graphics.Shader.Shader = class {
         return this._shaderHandle;
     }
 };
+
+if (!includeJSXnaShaderFlag) {
+    JSXnaLoadingStatus += 1;   
+    includeJSXnaShaderFlag = true;  // Declare as global.
+}

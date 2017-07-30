@@ -1,3 +1,5 @@
+var includeJSXnaGraphicsDeviceFlag = (typeof includeJSXnaGraphicsDeviceFlag == "undefined") ? false : includeJSXnaGraphicsDeviceFlag;
+
 /**
  * Performs primitive-based rendering, creates resources, handles system-level 
  * variables, adjusts gamma ramp levels, and creates shaders.
@@ -6,7 +8,7 @@
  * @version 0.1
  */
 
-JSXna.Utils.include['AJAX']('/JSXna/Framework/Graphics/GraphicsAdapter.js');
+JSXna.Utils.include['HTML']('/JSXna/Framework/Graphics/GraphicsAdapter.js');
 
 /**
  * My namespace for graphic device.
@@ -59,3 +61,8 @@ JSXna.Framework.Graphics.GraphicsDevice = class {
         }
     }
 };
+
+if (!includeJSXnaGraphicsDeviceFlag) {
+    JSXnaLoadingStatus += 1;   
+    includeJSXnaGraphicsDeviceFlag = true;
+}

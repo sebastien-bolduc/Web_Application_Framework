@@ -5,7 +5,11 @@
  * @version 1.0
  */
 
-JSXna.Utils.include['AJAX']('/Game1.js');
+var JSXnaLoadingInterval = undefined;
+var JSXnaLoadingStatus = 0;
+var JSXnaLoadingStatus_OK = 12;
+
+JSXna.Utils.include['HTML']('/Game1.js');
 
 /**
  * My namespace for the application.
@@ -31,8 +35,17 @@ MyFirstApplication.Program = class {
      * The main entry point for our application.
      */
     main() {
-        this.application = new MyFirstApplication.Game1();
-
-        this.application.run();
+        var that = this;
+        
+        JSXnaLoadingInterval = setInterval(function() {
+            document.getElementById("status").innerHTML = "Loading...  " + Math.round(JSXnaLoadingStatus/JSXnaLoadingStatus_OK * 100)  + "%";
+            if (JSXnaLoadingStatus >= JSXnaLoadingStatus_OK) {
+                document.getElementById("status").style.display = "none";
+                that.application = new MyFirstApplication.Game1();
+                that.application.run();
+                console.log("file included:  " + JSXnaLoadingStatus);
+                clearInterval(JSXnaLoadingInterval);
+            }
+        }, 200);
     }
 };

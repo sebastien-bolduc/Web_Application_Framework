@@ -1,3 +1,5 @@
+var includeJSXnaShaderProgramFlag = (typeof includeJSXnaShaderProgramFlag == "undefined") ? false : includeJSXnaShaderProgramFlag;
+
 /**
  * Link and use the programe for the current WebGL context.
  *
@@ -70,3 +72,8 @@ JSXna.Framework.Graphics.Shader.ShaderProgram = class {
         return this._programHandle;
     }
 };
+
+if (!includeJSXnaShaderProgramFlag) {
+    JSXnaLoadingStatus += 1;   
+    includeJSXnaShaderProgramFlag = true;
+}

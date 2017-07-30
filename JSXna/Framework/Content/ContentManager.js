@@ -1,3 +1,5 @@
+var includeJSXnaContentManagerFlag = (typeof includeJSXnaContentManagerFlag == "undefined") ? false : includeJSXnaContentManagerFlag;
+
 /**
  * The ContentManager is the run-time component which loads managed objects from 
  * the binary files produced by the design time content pipeline. It also manages 
@@ -8,8 +10,8 @@
  * @version 0.2
  */
 
-JSXna.Utils.include['AJAX']('/JSXna/Framework/Graphics/Shader/Shader.js');
-JSXna.Utils.include['AJAX']('/JSXna/Framework/Graphics/Shader/ShaderProgram.js');
+JSXna.Utils.include['HTML']('/JSXna/Framework/Graphics/Shader/Shader.js');
+JSXna.Utils.include['HTML']('/JSXna/Framework/Graphics/Shader/ShaderProgram.js');
 
 /**
  * My namespace for content manager.
@@ -118,3 +120,7 @@ JSXna.Framework.Content.ContentManager.prototype.load = {
         
 };
 
+if (!includeJSXnaContentManagerFlag) {
+    JSXnaLoadingStatus += 1;   
+    includeJSXnaContentManagerFlag = true;
+}

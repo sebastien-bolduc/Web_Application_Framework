@@ -1,3 +1,5 @@
+var includeJSXnaGameFlag = (typeof includeJSXnaGameFlag == "undefined") ? false : includeJSXnaGameFlag;
+
 /**
  * Provides basic graphics device initialization, game logic, and rendering 
  * code.
@@ -6,8 +8,8 @@
  * @version 0.4
  */
 
-JSXna.Utils.include['AJAX']('/JSXna/Framework/Content/ContentManager.js');
-JSXna.Utils.include['AJAX']('/JSXna/Framework/GameTime.js');
+JSXna.Utils.include['HTML']('/JSXna/Framework/Content/ContentManager.js');
+JSXna.Utils.include['HTML']('/JSXna/Framework/GameTime.js');
 
 /**
  * My namespace for game logic.
@@ -128,3 +130,11 @@ JSXna.Framework.Game = class {
         window.requestAnimationFrame(function(){that.tick()});
     }
 };
+
+if (!includeJSXnaGameFlag) {
+    JSXnaLoadingStatus += 1;   
+    includeJSXnaGameFlag = true;
+} 
+
+var eventJSXnaGameLoaded = new CustomEvent("JSXnaGameLoaded", {detail: { file: "Game.js" }, bubbles: true, cancelable: true });
+document.dispatchEvent(eventJSXnaGameLoaded);

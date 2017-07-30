@@ -1,3 +1,5 @@
+var includeJSXnaMouseFlag = (typeof includeJSXnaMouseFlag == "undefined") ? false : includeJSXnaMouseFlag;
+
 /**
  * Allows retrieval of position and button clicks from a mouse input device.
  *
@@ -5,7 +7,7 @@
  * @version 0.3
  */
 
-JSXna.Utils.include['AJAX']('/JSXna/Framework/Input/MouseState.js');
+JSXna.Utils.include['HTML']('/JSXna/Framework/Input/MouseState.js');
 
 /**
  * My namespace for mouse input.
@@ -45,3 +47,8 @@ JSXna.Framework.Input.Mouse = class {
         return this._mouseState;
     }
 };
+
+if (!includeJSXnaMouseFlag) {
+    JSXnaLoadingStatus += 1;   
+    includeJSXnaMouseFlag = true;
+}
