@@ -137,7 +137,8 @@ JSXna.Framework.Input.MouseState = class {
     }
 };
 
+// Check if we already included this file...
 if (!includeJSXnaMouseStateFlag) {
-    JSXnaLoadingStatus += 1;   
+    JSXnaLoadingStatus += 1;
     includeJSXnaMouseStateFlag = true;
 }

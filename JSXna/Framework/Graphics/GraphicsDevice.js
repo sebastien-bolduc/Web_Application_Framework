@@ -36,7 +36,7 @@ JSXna.Framework.Graphics.GraphicsDevice = class {
     constructor() {
         this._adapter = new JSXna.Framework.Graphics.GraphicsAdapter();
     }
-    
+
     /**
      * Gets the graphics adapter.
      * 
@@ -51,7 +51,7 @@ JSXna.Framework.Graphics.GraphicsDevice = class {
      */
     clear() {
         var gl = this.Adapter.DefaultAdapter;
-        
+
         // Check if WebGL is available and running.
         if (gl) {
             gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -62,7 +62,8 @@ JSXna.Framework.Graphics.GraphicsDevice = class {
     }
 };
 
+// Check if we already included this file...
 if (!includeJSXnaGraphicsDeviceFlag) {
-    JSXnaLoadingStatus += 1;   
+    JSXnaLoadingStatus += 1;
     includeJSXnaGraphicsDeviceFlag = true;
 }

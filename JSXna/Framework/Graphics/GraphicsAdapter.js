@@ -64,7 +64,8 @@ JSXna.Framework.Graphics.GraphicsAdapter = class {
     }
 };
 
+// Check if we already included this file...
 if (!includeJSXnaGraphicsAdapterFlag) {
-    JSXnaLoadingStatus += 1;   
+    JSXnaLoadingStatus += 1;
     includeJSXnaGraphicsAdapterFlag = true;
 }

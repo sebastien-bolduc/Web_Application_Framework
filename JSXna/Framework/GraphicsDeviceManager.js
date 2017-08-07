@@ -33,7 +33,7 @@ JSXna.Framework.GraphicsDeviceManager = class {
     constructor() {
         this._graphicsDevice = new JSXna.Framework.Graphics.GraphicsDevice();
     }
-    
+
     /**
      * Gets the GraphicsDevice associated with the GraphicsDeviceManager.
      * 
@@ -44,7 +44,8 @@ JSXna.Framework.GraphicsDeviceManager = class {
     }
 };
 
+// Check if we already included this file...
 if (!includeJSXnaGraphicsDeviceManagerFlag) {
-    JSXnaLoadingStatus += 1;   
+    JSXnaLoadingStatus += 1;
     includeJSXnaGraphicsDeviceManagerFlag = true;
 }

@@ -7,7 +7,7 @@ var includeJSXnaGameTimeFlag = (typeof includeJSXnaGameTimeFlag == "undefined") 
  * @author Sébastien Bolduc <sebastien.bolduc@gmail.com>
  * @version 0.2
  */
- 
+
 /**
  * My namespace for game time.
  * (We take the time to check if all namespaces are already created)
@@ -33,7 +33,7 @@ JSXna.Framework.GameTime = class {
         this.elapsedGameTime.totalMilliseconds = 0;
         this.elapsedGameTime.totalSeconds = 0;
     }
-    
+
     /**
      * The amount of elapsed game time since the last update.
      * 
@@ -42,13 +42,14 @@ JSXna.Framework.GameTime = class {
     set ElapsedGameTime(gameTime) {
         if (typeof gameTime.timeSpan == "undefined") {
             gameTime.timeSpan = new Date().getTime();
-        } else {
+        }
+        else {
             gameTime.elapsedGameTime.totalMilliseconds = (new Date().getTime()) - gameTime.timeSpan;
-            gameTime.elapsedGameTime.totalSeconds = gameTime.elapsedGameTime.totalMilliseconds / 1000; 
+            gameTime.elapsedGameTime.totalSeconds = gameTime.elapsedGameTime.totalMilliseconds / 1000;
             gameTime.timeSpan = new Date().getTime();
         }
     }
-    
+
     /**
      * The amount of elapsed game time since the last update.
      * 
@@ -59,7 +60,8 @@ JSXna.Framework.GameTime = class {
     }
 };
 
+// Check if we already included this file...
 if (!includeJSXnaGameTimeFlag) {
-    JSXnaLoadingStatus += 1;   
+    JSXnaLoadingStatus += 1;
     includeJSXnaGameTimeFlag = true;
 }

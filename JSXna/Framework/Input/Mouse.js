@@ -48,7 +48,8 @@ JSXna.Framework.Input.Mouse = class {
     }
 };
 
+// Check if we already included this file...
 if (!includeJSXnaMouseFlag) {
-    JSXnaLoadingStatus += 1;   
+    JSXnaLoadingStatus += 1;
     includeJSXnaMouseFlag = true;
 }

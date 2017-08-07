@@ -7,12 +7,17 @@ var includeJSXnaGame1Flag = (typeof includeJSXnaGame1Flag == "undefined") ? fals
  * @version 0.1
  */
 
+// This is a special case.  Since we are using the keyword 'extends' for the
+// 'child' class, we have to make sure that the 'parent' class was created.  So 
+// we are waiting for the signal from the parent class to initialize the child 
+// class.
 document.addEventListener("JSXnaGameLoaded", classJSXnaGame1, false);
 
 JSXna.Utils.include['HTML']('/JSXna/Framework/Game.js');
 JSXna.Utils.include['HTML']('/JSXna/Framework/GraphicsDeviceManager.js');
 JSXna.Utils.include['HTML']('/JSXna/Framework/Input/Mouse.js');
 JSXna.Utils.include['HTML']('/JSXna/Framework/Rectangle.js');
+JSXna.Utils.include['HTML']('/JSXna/Framework/Matrix.js');
 
 /**
  * My namespace for the application.
@@ -22,7 +27,6 @@ JSXna.Utils.include['HTML']('/JSXna/Framework/Rectangle.js');
 if (typeof MyFirstApplication == "undefined") {
     var MyFirstApplication = {};
 }
-
 
 function classJSXnaGame1(e) {
     document.removeEventListener("JSXnaGameLoaded", classJSXnaGame1, false);
@@ -37,20 +41,17 @@ function classJSXnaGame1(e) {
             this.Content.RootDirectory = "/Content/";
 
             this.myShader;
+            this.modelLocation = undefined;
+            this.viewLocation = undefined;
+            this.projectionLocation = undefined;
             this.positionLocation = undefined;
-            this.positionBuffer = undefined;
-
-            this.x1 = -0.5;
-            this.x2 = 0.5;
-            this.y1 = -0.5;
-            this.y2 = 0.5;
-            this.xSpeed = 0.5;
-            this.ySpeed = 0.15;
-
-            this.mouseInput = undefined;
-            this.rectangle = undefined;
-            this.mousePointer = undefined;
-            this.intersectsFlag = false;
+            this.colorLocation = undefined;
+            this.positionsBuffer = undefined;
+            this.colorsBuffer = undefined;
+            this.elementsBuffer = undefined;
+            
+            this.boxRed = undefined;
+            this.cubeModel = undefined;
         }
 
         /**
@@ -62,12 +63,9 @@ function classJSXnaGame1(e) {
         initialize() {
             // TODO: Add your initialization logic here
             var gl = this.graphics.GraphicsDevice.Adapter.DefaultAdapter;
-            this.positionBuffer = gl.createBuffer();
-            this.mouseInput = new JSXna.Framework.Input.Mouse();
-
-            // Create our 2D bounding box...
-            this.rectangle = new JSXna.Framework.Rectangle(this.x1, this.y1, 1, 1);
-            this.mousePointer = new JSXna.Framework.Rectangle(0, 0, 0.001, 0.001);
+            this.positionsBuffer = gl.createBuffer();
+            this.colorsBuffer = gl.createBuffer();
+            this.elementsBuffer = gl.createBuffer();
 
             super.initialize(); //This is the function we override in the parent.
         }
@@ -82,7 +80,47 @@ function classJSXnaGame1(e) {
             this.myShader = this.Content.load['Effect'](gl, this.Content.RootDirectory + "FragmentShader.fx", this.Content.RootDirectory + "VertexShader.fx");
 
             // ...and set the attributes.
-            this.positionLocation = gl.getAttribLocation(this.myShader, "a_position");
+            this.modelLocation = gl.getUniformLocation(this.myShader, 'model');
+            this.viewLocation = gl.getUniformLocation(this.myShader, 'view');
+            this.projectionLocation = gl.getUniformLocation(this.myShader, 'projection')
+            this.positionLocation = gl.getAttribLocation(this.myShader, "position");
+            this.colorLocation = gl.getAttribLocation(this.myShader, 'color');
+            
+            // Box model.
+            /*this.boxRed = new MyFirstApplication.Box({
+                top : 0.5,
+                bottom: -0.5,
+                left: -0.5,
+                right: 0.5,
+                
+                depth: 0,
+                w: 0.7,
+                color: [1, 0.4, 0.4, 1]
+            });
+            this.boxGreen = new MyFirstApplication.Box({
+                top : 0.9,
+                bottom: -0,
+                left: -0.9,
+                right: 0.9,
+                
+                depth: 0.5,
+                w: 1.1,
+                color: [0.4, 1, 0.4, 1]
+            });
+            this.boxBlue = new MyFirstApplication.Box({
+                top : 1,
+                bottom: -1,
+                left: -1,
+                right: 1,
+                
+                depth: -1.5,
+                w: 1.5,
+                color: [0.4, 0.4, 1, 1]
+            });*/
+            
+            // Cube model.
+            this.cubeModel = new MyFirstApplication.Cube();
+            this.cubeModel.createBuffer(this);
         }
 
         /**
@@ -99,66 +137,11 @@ function classJSXnaGame1(e) {
         update(gameTime) {
             var gl = this.graphics.GraphicsDevice.Adapter.DefaultAdapter;
 
-            // .. and update our 2D bounding box.
-            this.rectangle.X = this.x1;
-            this.rectangle.Y = this.y1;
-            this.mousePointer.X = (this.mouseInput.GetState.X / 320) - 1;
-            this.mousePointer.Y = -((this.mouseInput.GetState.Y / 240) - 1);
-
-            if (this.mouseInput.GetState.LeftButton || this.mouseInput.GetState.RightButton) {
-                // Check to see if we click the rectangle and update is position according to the mouse pointer.
-                if (this.mousePointer.intersects(this.rectangle) || this.intersectsFlag) {
-                    this.x1 = this.mousePointer.Left - 0.5;
-                    this.x2 = (this.x1 + 1);
-                    this.y2 = this.mousePointer.Top + 0.5;
-                    this.y1 = this.y2 - 1;
-                    this.intersectsFlag = true;
-                }
-            }
-            else {
-                this.intersectsFlag = false;
-                // ---------------------------------------------------------------------
-                var elapsedGameTime = gameTime.ElapsedGameTime.totalSeconds;
-                this.x1 += this.xSpeed * elapsedGameTime;
-                this.x2 += this.xSpeed * elapsedGameTime;
-                this.y1 += this.ySpeed * elapsedGameTime;
-                this.y2 += this.ySpeed * elapsedGameTime;
-
-                if (this.x2 > 1) {
-                    this.xSpeed *= -1;
-                    this.x1 = 0;
-                    this.x2 = 1;
-                }
-                else if (this.x1 < -1) {
-                    this.xSpeed *= -1;
-                    this.x1 = -1;
-                    this.x2 = 0;
-                }
-
-                if (this.y2 > 1) {
-                    this.ySpeed *= -1;
-                    this.y1 = 0;
-                    this.y2 = 1;
-                }
-                else if (this.y1 < -1) {
-                    this.ySpeed *= -1;
-                    this.y1 = -1;
-                    this.y2 = 0;
-                }
-                // ---------------------------------------------------------------------
-            }
-
-            var vertices = [this.x1, this.y2,
-                this.x1, this.y1,
-                this.x2, this.y2,
-                this.x2, this.y2,
-                this.x1, this.y1,
-                this.x2, this.y1
-            ];
-
-            gl.enableVertexAttribArray(this.positionLocation);
-            gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+            var model = this.cubeModel.modelMatrix(Date.now());
+            //var projection = this.cubeModel.simpleProjectionMatrix(0.5);
+            var projection = this.cubeModel.perspectiveProjectionMatrix();
+            var view = this.cubeModel.viewMatrix(Date.now());
+            this.cubeModel.updateAttributesAndUniforms(this, model, view, projection);
 
             super.update(gameTime); //This is the function we override in the parent.
         }
@@ -171,15 +154,231 @@ function classJSXnaGame1(e) {
 
             this.graphics.GraphicsDevice.clear();
 
-            gl.vertexAttribPointer(this.positionLocation, 2, gl.FLOAT, false, 0, 0);
-            gl.drawArrays(gl.TRIANGLES, 0, 6);
+            /*this.boxRed.draw(this);
+            this.boxGreen.draw(this);
+            this.boxBlue.draw(this);*/
+            
+            this.cubeModel.draw(this);
 
             super.draw(gameTime); //This is the function we override in the parent.
         }
     };
-    
+
+    // Check if we already included this file...
     if (!includeJSXnaGame1Flag) {
         JSXnaLoadingStatus += 1;
-        includeJSXnaGame1Flag = true;  
+        includeJSXnaGame1Flag = true;
     }
 }
+
+MyFirstApplication.Box = class {
+    constructor(settings) {
+        this.top = settings.top;        // x
+        this.bottom = settings.bottom;  // x
+        this.left = settings.left;      // y
+        this.right = settings.right;    // y
+        
+        this.depth = settings.depth;    // z
+        this.w = settings.w;            // w
+        this.color = settings.color;
+    }
+    
+    draw(context) {
+        // Create some attribute data; these are the triangle that will end being
+        // drawn to the screen.  There are two that form a square.
+        
+        var data = new Float32Array([
+            
+            // Triangle 1
+            this.left, this.bottom, this.depth, this.w,
+            this.right, this.bottom, this.depth, this.w,
+            this.left, this.top, this.depth, this.w,
+            
+            // Triangle 2
+            this.left, this.top, this.depth, this.w,
+            this.right, this.bottom, this.depth, this.w,
+            this.right, this.top, this.depth, this.w
+        ]);
+            
+        // Use WebGL to draw this onto the screen.
+        var gl = context.graphics.GraphicsDevice.Adapter.DefaultAdapter;
+        gl.bindBuffer(gl.ARRAY_BUFFER, context.positionBuffer)
+        gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+        
+        // Setup the pointer to our attribute data (the triangles)
+        gl.enableVertexAttribArray(context.positionLocation);
+        gl.vertexAttribPointer(context.positionLocation, 4, gl.FLOAT, false, 0, 0);
+        
+        // Setup the color uniform that will be shared across all triangles
+        gl.uniform4fv(context.colorLocation, this.color);
+        
+        // Draw the triangles to the screen
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+    }
+};
+
+MyFirstApplication.Cube = class {
+  constructor() {
+      this.positions = [
+      // Front face
+      -1.0, -1.0,  1.0,
+       1.0, -1.0,  1.0,
+       1.0,  1.0,  1.0,
+      -1.0,  1.0,  1.0,
+
+      // Back face
+      -1.0, -1.0, -1.0,
+      -1.0,  1.0, -1.0,
+       1.0,  1.0, -1.0,
+       1.0, -1.0, -1.0,
+
+      // Top face
+      -1.0,  1.0, -1.0,
+      -1.0,  1.0,  1.0,
+       1.0,  1.0,  1.0,
+       1.0,  1.0, -1.0,
+
+      // Bottom face
+      -1.0, -1.0, -1.0,
+       1.0, -1.0, -1.0,
+       1.0, -1.0,  1.0,
+      -1.0, -1.0,  1.0,
+
+      // Right face
+       1.0, -1.0, -1.0,
+       1.0,  1.0, -1.0,
+       1.0,  1.0,  1.0,
+       1.0, -1.0,  1.0,
+
+      // Left face
+      -1.0, -1.0, -1.0,
+      -1.0, -1.0,  1.0,
+      -1.0,  1.0,  1.0,
+      -1.0,  1.0, -1.0
+    ];
+  
+    var colorsOfFaces = [
+      [0.3,  1.0,  1.0,  1.0],    // Front face: cyan
+      [1.0,  0.3,  0.3,  1.0],    // Back face: red
+      [0.3,  1.0,  0.3,  1.0],    // Top face: green
+      [0.3,  0.3,  1.0,  1.0],    // Bottom face: blue
+      [1.0,  1.0,  0.3,  1.0],    // Right face: yellow
+      [1.0,  0.3,  1.0,  1.0]     // Left face: purple
+    ];
+  
+    this.colors = [];
+
+    for (var j=0; j<6; j++) {
+      var polygonColor = colorsOfFaces[j];
+    
+      for (var i=0; i<4; i++) {
+        this.colors = this.colors.concat( polygonColor );
+      }
+    }
+  
+    this.elements = [
+      0,  1,  2,      0,  2,  3,    // front
+      4,  5,  6,      4,  6,  7,    // back
+      8,  9,  10,     8,  10, 11,   // top
+      12, 13, 14,     12, 14, 15,   // bottom
+      16, 17, 18,     16, 18, 19,   // right
+      20, 21, 22,     20, 22, 23    // left
+    ];
+  }
+  
+  createBuffer(context) {
+      var gl = context.graphics.GraphicsDevice.Adapter.DefaultAdapter;
+      
+      gl.bindBuffer(gl.ARRAY_BUFFER, context.positionsBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.positions), gl.STATIC_DRAW);
+      
+      gl.bindBuffer(gl.ARRAY_BUFFER, context.colorsBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.colors), gl.STATIC_DRAW);
+      
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, context.elementsBuffer);
+      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.elements), gl.STATIC_DRAW);
+  }
+  
+  modelMatrix(now) {
+      // Scale down by 50%
+      var scale = JSXna.Framework.Matrix.createScale(5, 5, 5);
+      
+      // Rotate a slight tilt
+      var rotateX = JSXna.Framework.Matrix.createRotationX(now * 0.0003);
+      
+      // Rotate according to time
+      var rotateY = JSXna.Framework.Matrix.createRotationY(now * 0.0005);
+      
+      // Move slightly down
+      var position = JSXna.Framework.Matrix.createTranslation(0, 0, 0);
+      
+      // Multiply together, make sure and read them in opposite order
+      var model = JSXna.Framework.Matrix.multiply(rotateY, position);
+      model = JSXna.Framework.Matrix.multiply(rotateX, model);
+      model = JSXna.Framework.Matrix.multiply(scale, model);
+      
+      return model;
+  }
+  
+  viewMatrix(now) {
+      //var moveInAndOut = 20 * Math.sin(now * 0.002);
+      var moveLeftAndRight = 5 * Math.sin(now * 0.0017);
+      var zoomInAndOut = 5 * Math.sin(now * 0.002);
+      
+      // Move slightly down
+      var position = JSXna.Framework.Matrix.createTranslation(moveLeftAndRight, 0, 20 + zoomInAndOut);
+      
+      // Move the camera around
+      //var position = JSXna.Framework.Matrix.createTranslation(moveLeftAndRight, 0, 35 + moveInAndOut);
+      
+      // Inverse the operation for camera movements, because we are actually
+      // moving geometry in the scene, not the camera itself.
+      return JSXna.Framework.Matrix.invert(position);
+  }
+  
+  simpleProjectionMatrix(scaleFactor) {
+      var projection = JSXna.Framework.Matrix.identity();
+      
+      projection.matrix[11] = scaleFactor;
+      projection.matrix[15] = scaleFactor;
+      
+      return projection;
+  }
+  
+  perspectiveProjectionMatrix() {
+      var fieldOfViewInRadians = Math.PI * 0.5;
+      var aspectRatio = 640 / 480;
+      var nearClippingPlaneDistance = 1;
+      var farClippingPlaneDistance = 50;
+      
+      return JSXna.Framework.Matrix.createPerspectiveFieldOfView(fieldOfViewInRadians, aspectRatio, nearClippingPlaneDistance, farClippingPlaneDistance);
+  }
+  
+  updateAttributesAndUniforms(context, model, view, projection) {
+      var gl = context.graphics.GraphicsDevice.Adapter.DefaultAdapter;
+      
+      // Setup the color uniform that will be shared across all triangles
+      gl.uniformMatrix4fv(context.modelLocation, false, new Float32Array(model.matrix));
+      gl.uniformMatrix4fv(context.viewLocation, false, new Float32Array(view.matrix));
+      gl.uniformMatrix4fv(context.projectionLocation, false, new Float32Array(projection.matrix));
+      
+      // Set the position attribute
+      gl.enableVertexAttribArray(context.positionLocation);
+      gl.bindBuffer(gl.ARRAY_BUFFER, context.positionsBuffer);
+      gl.vertexAttribPointer(context.positionLocation, 3, gl.FLOAT, false, 0, 0);
+      
+      // Set the colors attribute
+      gl.enableVertexAttribArray(context.colorLocation);
+      gl.bindBuffer(gl.ARRAY_BUFFER, context.colorsBuffer);
+      gl.vertexAttribPointer(context.colorLocation, 4, gl.FLOAT, false, 0, 0);
+      
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, context.elementsBuffer);
+  }
+  
+  draw(context) {
+      var gl = context.graphics.GraphicsDevice.Adapter.DefaultAdapter;
+      
+      // Perform the actual draw
+      gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
+  }
+};

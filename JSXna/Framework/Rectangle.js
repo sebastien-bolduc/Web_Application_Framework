@@ -37,7 +37,7 @@ JSXna.Framework.Rectangle = class {
         this.Width = width;
         this.Height = height;
     }
-    
+
     /**
      * Returns the x-coordinate of the left side of the rectangle.
      * 
@@ -46,7 +46,7 @@ JSXna.Framework.Rectangle = class {
     get Left() {
         return this.X;
     }
-    
+
     /**
      * Returns the x-coordinate of the right side of the rectangle.
      * 
@@ -55,7 +55,7 @@ JSXna.Framework.Rectangle = class {
     get Right() {
         return this.X + this.Width;
     }
-    
+
     /**
      * Returns the y-coordinate of the top of the rectangle.
      * 
@@ -64,7 +64,7 @@ JSXna.Framework.Rectangle = class {
     get Top() {
         return this.Y;
     }
-    
+
     /**
      * Returns the y-coordinate of the bottom of the rectangle.
      * 
@@ -73,7 +73,7 @@ JSXna.Framework.Rectangle = class {
     get Bottom() {
         return this.Y + this.Height;
     }
-    
+
     /**
      * Determines whether a specified Rectangle intersects with this Rectangle.
      * 
@@ -84,14 +84,15 @@ JSXna.Framework.Rectangle = class {
             this.Right > rectangle.Left &&
             this.Top < rectangle.Bottom &&
             this.Bottom > rectangle.Top) {
-                return true;
-            }
-        
+            return true;
+        }
+
         return false;
     }
 };
 
+// Check if we already included this file...
 if (!includeJSXnaRectangleFlag) {
-    JSXnaLoadingStatus += 1;   
+    JSXnaLoadingStatus += 1;
     includeJSXnaRectangleFlag = true;
 }

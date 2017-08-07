@@ -7,7 +7,7 @@
 
 var JSXnaLoadingInterval = undefined;
 var JSXnaLoadingStatus = 0;
-var JSXnaLoadingStatus_OK = 12;
+var JSXnaLoadingStatus_OK = 14;
 
 JSXna.Utils.include['HTML']('/Game1.js');
 
@@ -36,9 +36,9 @@ MyFirstApplication.Program = class {
      */
     main() {
         var that = this;
-        
+
         JSXnaLoadingInterval = setInterval(function() {
-            document.getElementById("status").innerHTML = "Loading...  " + Math.round(JSXnaLoadingStatus/JSXnaLoadingStatus_OK * 100)  + "%";
+            document.getElementById("status").innerHTML = "Loading...  " + Math.round(JSXnaLoadingStatus / JSXnaLoadingStatus_OK * 100) + "%";
             if (JSXnaLoadingStatus >= JSXnaLoadingStatus_OK) {
                 document.getElementById("status").style.display = "none";
                 that.application = new MyFirstApplication.Game1();

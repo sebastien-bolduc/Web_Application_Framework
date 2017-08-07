@@ -36,10 +36,10 @@ JSXna.Framework.Content.ContentManager = class {
     /**
      * Initializes a new instance of ContentManager.
      */
-    constructor() { 
+    constructor() {
         this._rootDirectory = undefined;
     }
-    
+
     /**
      * Sets the root directory associated with this ContentManager.
      * 
@@ -48,7 +48,7 @@ JSXna.Framework.Content.ContentManager = class {
     set RootDirectory(rootDirectory) {
         this._rootDirectory = rootDirectory;
     }
-    
+
     /**
      * Gets the root directory associated with this ContentManager.
      * 
@@ -57,7 +57,7 @@ JSXna.Framework.Content.ContentManager = class {
     get RootDirectory() {
         return this._rootDirectory;
     }
-    
+
     /**
      * Get a file from the url address.
      * 
@@ -68,11 +68,11 @@ JSXna.Framework.Content.ContentManager = class {
     static getFile(url) {
         var ajax = new XMLHttpRequest();
         var file = undefined;
-        ajax.open( 'GET', url, false ); // <-- the 'false' makes it synchronous
-        ajax.onreadystatechange = function () {
+        ajax.open('GET', url, false); // <-- the 'false' makes it synchronous
+        ajax.onreadystatechange = function() {
             file = ajax.response || ajax.responseText;
             if (ajax.readyState === 4) {
-                switch( ajax.status) {
+                switch (ajax.status) {
                     case 200:
                         console.log("file loaded: ", url);
                         break;
@@ -82,7 +82,7 @@ JSXna.Framework.Content.ContentManager = class {
             }
         };
         ajax.send(null);
-        
+
         return file;
     }
 };
@@ -112,15 +112,16 @@ JSXna.Framework.Content.ContentManager.prototype.load = {
         var fShaderHandle = fragmentShader.ShaderHandle;
         var vertexShader = new JSXna.Framework.Graphics.Shader.Shader(gl, gl.VERTEX_SHADER, JSXna.Framework.Content.ContentManager.getFile(vertexShaderUrl));
         var vShaderHandle = vertexShader.ShaderHandle;
-        
+
         var program = new JSXna.Framework.Graphics.Shader.ShaderProgram(gl);
         program.linkProgram(fShaderHandle, vShaderHandle);
         return program.ProgramHandle;
     }
-        
+
 };
 
+// Check if we already included this file...
 if (!includeJSXnaContentManagerFlag) {
-    JSXnaLoadingStatus += 1;   
+    JSXnaLoadingStatus += 1;
     includeJSXnaContentManagerFlag = true;
 }

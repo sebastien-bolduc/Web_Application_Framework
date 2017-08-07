@@ -35,11 +35,11 @@ JSXna.Framework.Game = class {
     constructor() {
         this._content = undefined;
         this.Content = new JSXna.Framework.Content.ContentManager();
-        
+
         this._updateGameTime = undefined;
         this._drawGameTime = undefined;
     }
-    
+
     /**
      * Sets the current ContentManager.
      * 
@@ -48,7 +48,7 @@ JSXna.Framework.Game = class {
     set Content(contentManager) {
         this._content = contentManager;
     }
-    
+
     /**
      * Gets the current ContentManager.
      * 
@@ -83,7 +83,7 @@ JSXna.Framework.Game = class {
     //unloadContent() {
     //    console.log("You must overrride this function.");
     //}
-    
+
     /**
      * Called when the game has determined that game logic needs to be processed.
      */
@@ -91,7 +91,7 @@ JSXna.Framework.Game = class {
     update(gameTime) {
         gameTime.ElapsedGameTime = gameTime;
     }
-    
+
     /**
      * Called when the game determines it is time to draw a frame.
      */
@@ -99,7 +99,7 @@ JSXna.Framework.Game = class {
     draw(gameTime) {
         gameTime.ElapsedGameTime = gameTime;
     }
-    
+
     /**
      * Resets the elapsed time counter.
      */
@@ -115,7 +115,7 @@ JSXna.Framework.Game = class {
     run() {
         this.initialize();
         this.loadContent();
-        
+
         this.tick();
     }
 
@@ -125,16 +125,26 @@ JSXna.Framework.Game = class {
     tick() {
         this.update(this._updateGameTime);
         this.draw(this._drawGameTime);
-        
+
         var that = this;
-        window.requestAnimationFrame(function(){that.tick()});
+        window.requestAnimationFrame(function() {
+            that.tick()
+        });
     }
 };
 
+// Check if we already included this file...
 if (!includeJSXnaGameFlag) {
-    JSXnaLoadingStatus += 1;   
+    JSXnaLoadingStatus += 1;
     includeJSXnaGameFlag = true;
-} 
+}
 
-var eventJSXnaGameLoaded = new CustomEvent("JSXnaGameLoaded", {detail: { file: "Game.js" }, bubbles: true, cancelable: true });
+// Create and fire en 'event' telling that this class is now available.
+var eventJSXnaGameLoaded = new CustomEvent("JSXnaGameLoaded", {
+    detail: {
+        file: "Game.js"
+    },
+    bubbles: true,
+    cancelable: true
+});
 document.dispatchEvent(eventJSXnaGameLoaded);

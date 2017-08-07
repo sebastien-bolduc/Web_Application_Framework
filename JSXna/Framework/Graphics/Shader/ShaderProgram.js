@@ -6,7 +6,7 @@ var includeJSXnaShaderProgramFlag = (typeof includeJSXnaShaderProgramFlag == "un
  * @author Sébastien Bolduc <sebastien.bolduc@gmail.com>
  * @version 0.1
  */
- 
+
 /**
  * My namespace for shader program class.
  * (We take the time to check if all namespaces are already created)
@@ -32,7 +32,7 @@ if (typeof JSXna.Framework.Graphics.Shader == "undefined") {
  * will be resused.
  */
 JSXna.Framework.Graphics.Shader.ShaderProgram = class {
-   /**
+    /**
      * Creates an instance of this object.
      * 
      * @param {WebGL context} gl -  The WebGL context.
@@ -41,7 +41,7 @@ JSXna.Framework.Graphics.Shader.ShaderProgram = class {
         this._gl = gl;
         this._programHandle = undefined;
     }
-    
+
     /**
      * Linking the shaders as one program.
      * 
@@ -52,7 +52,7 @@ JSXna.Framework.Graphics.Shader.ShaderProgram = class {
         if (typeof this._programHandle != "undefined") {
             return this._programHandle;
         }
-        
+
         this._programHandle = this._gl.createProgram();
         this._gl.attachShader(this._programHandle, fragmentShader);
         this._gl.attachShader(this._programHandle, vertexShader);
@@ -62,7 +62,7 @@ JSXna.Framework.Graphics.Shader.ShaderProgram = class {
         }
         this._gl.useProgram(this._programHandle);
     }
-    
+
     /**
      * Return the current program handle.
      * 
@@ -73,7 +73,8 @@ JSXna.Framework.Graphics.Shader.ShaderProgram = class {
     }
 };
 
+// Check if we already included this file...
 if (!includeJSXnaShaderProgramFlag) {
-    JSXnaLoadingStatus += 1;   
+    JSXnaLoadingStatus += 1;
     includeJSXnaShaderProgramFlag = true;
 }

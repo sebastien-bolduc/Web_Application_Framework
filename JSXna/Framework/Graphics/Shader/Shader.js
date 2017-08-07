@@ -6,7 +6,7 @@ var includeJSXnaShaderFlag = (typeof includeJSXnaShaderFlag == "undefined") ? fa
  * @author Sébastien Bolduc <sebastien.bolduc@gmail.com>
  * @version 0.1
  */
- 
+
 /**
  * My namespace for shader class.
  * (We take the time to check if all namespaces are already created)
@@ -42,18 +42,18 @@ JSXna.Framework.Graphics.Shader.Shader = class {
         this._source = source;
         this._shaderHandle = undefined;
     }
-    
+
     /**
      * Get an handle for the shader
      * 
      * @returns {shader handle} An handle to the shader.
-     */ 
+     */
     get ShaderHandle() {
         // If the shader has already been created then return it.
         if (typeof this._shaderHandle != "undefined") {
             return this._shaderHandle;
         }
-        
+
         this._shaderHandle = this._gl.createShader(this._type);
         this._gl.shaderSource(this._shaderHandle, this._source);
         this._gl.compileShader(this._shaderHandle);
@@ -64,12 +64,13 @@ JSXna.Framework.Graphics.Shader.Shader = class {
         else {
             console.log("shader compile successfully!");
         }
-        
+
         return this._shaderHandle;
     }
 };
 
+// Check if we already included this file...
 if (!includeJSXnaShaderFlag) {
-    JSXnaLoadingStatus += 1;   
-    includeJSXnaShaderFlag = true;  // Declare as global.
+    JSXnaLoadingStatus += 1;
+    includeJSXnaShaderFlag = true;
 }
