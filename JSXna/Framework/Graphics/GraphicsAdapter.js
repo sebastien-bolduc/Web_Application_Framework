@@ -40,6 +40,9 @@ JSXna.Framework.Graphics.GraphicsAdapter = class {
      * @param {string} cancas - Hmtl canvas to be link with WebGL.
      */
     set DefaultAdapter(canvas) {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
         try {
             // Try to get the standard context.  If it fail, try the experimental call.
             this._WebGLcontext = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");

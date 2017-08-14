@@ -8,6 +8,7 @@ var includeJSXnaGraphicsDeviceFlag = (typeof includeJSXnaGraphicsDeviceFlag == "
  * @version 0.1
  */
 
+JSXna.Utils.include['HTML']('/JSXna/Framework/Graphics/DisplayMode.js');
 JSXna.Utils.include['HTML']('/JSXna/Framework/Graphics/GraphicsAdapter.js');
 
 /**
@@ -44,6 +45,15 @@ JSXna.Framework.Graphics.GraphicsDevice = class {
      */
     get Adapter() {
         return this._adapter;
+    }
+    
+    /**
+     * Gets a viewport identifying the portion of the render target to receive draw calls.
+     * 
+     * @returns {DisplayMode} The viewport to get.
+     */
+    get Viewport() {
+        return new JSXna.Framework.Graphics.DisplayMode(document.getElementById("JSXnaGLcanvas"));
     }
 
     /**

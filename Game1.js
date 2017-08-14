@@ -38,6 +38,7 @@ function classJSXnaGame1(e) {
             super();
 
             this.graphics = new JSXna.Framework.GraphicsDeviceManager();
+            console.log(this.graphics.GraphicsDevice.Viewport.Width + " , " + this.graphics.GraphicsDevice.Viewport.Height);
             this.Content.RootDirectory = "/Content/";
 
             this.myShader;
@@ -52,6 +53,12 @@ function classJSXnaGame1(e) {
             
             this.boxRed = undefined;
             this.cubeModel = undefined;
+            
+            this.mouseInput = undefined;
+            this.currentX = undefined;
+            this.currentY = undefined;
+            this.angleXaxis = undefined;
+            this.angleYaxis = undefined;
         }
 
         /**
@@ -63,10 +70,17 @@ function classJSXnaGame1(e) {
         initialize() {
             // TODO: Add your initialization logic here
             var gl = this.graphics.GraphicsDevice.Adapter.DefaultAdapter;
+            
             this.positionsBuffer = gl.createBuffer();
             this.colorsBuffer = gl.createBuffer();
             this.elementsBuffer = gl.createBuffer();
-
+            
+            this.mouseInput = new JSXna.Framework.Input.Mouse();
+            this.currentX = this.mouseInput.GetState.X;
+            this.currentY = this.mouseInput.GetState.Y;
+            this.angleXaxis = 0;
+            this.angleYaxis = 0;
+            
             super.initialize(); //This is the function we override in the parent.
         }
 
@@ -137,10 +151,25 @@ function classJSXnaGame1(e) {
         update(gameTime) {
             var gl = this.graphics.GraphicsDevice.Adapter.DefaultAdapter;
 
+            if (this.mouseInput.GetState.LeftButton || this.mouseInput.GetState.RightButton) {
+                this.angleXaxis += (this.mouseInput.GetState.Y - this.currentY) * 0.002;
+                this.angleYaxis += (this.mouseInput.GetState.X - this.currentX) * 0.002;
+                
+                // Check limit for angle on the X axis.
+                this.angleXaxis = (this.angleXaxis > (2 * Math.PI)) ? this.angleXaxis - (Math.PI * 2) : this.angleXaxis;
+                this.angleXaxis = (this.angleXaxis < 0) ? (Math.PI * 2) + this.angleXaxis : this.angleXaxis;
+                
+                // Check limit for angle on the Y axis.
+                this.angleYaxis = (this.angleYaxis > (2 * Math.PI)) ? this.angleYaxis - (Math.PI * 2) : this.angleYaxis;
+                this.angleYaxis = (this.angleYaxis < 0) ? (Math.PI * 2) + this.angleYaxis : this.angleYaxis;
+            }
+            this.currentX = this.mouseInput.GetState.X;
+            this.currentY = this.mouseInput.GetState.Y;
+
             var model = this.cubeModel.modelMatrix(Date.now());
             //var projection = this.cubeModel.simpleProjectionMatrix(0.5);
-            var projection = this.cubeModel.perspectiveProjectionMatrix();
-            var view = this.cubeModel.viewMatrix(Date.now());
+            var projection = this.cubeModel.perspectiveProjectionMatrix(this.graphics.GraphicsDevice.Viewport.AspectRatio);
+            var view = this.cubeModel.viewMatrix(Date.now(), this.angleXaxis, this.angleYaxis);
             this.cubeModel.updateAttributesAndUniforms(this, model, view, projection);
 
             super.update(gameTime); //This is the function we override in the parent.
@@ -320,20 +349,29 @@ MyFirstApplication.Cube = class {
       return model;
   }
   
-  viewMatrix(now) {
+  viewMatrix(now, angleXaxis, angleYaxis) {
       //var moveInAndOut = 20 * Math.sin(now * 0.002);
       var moveLeftAndRight = 5 * Math.sin(now * 0.0017);
       var zoomInAndOut = 5 * Math.sin(now * 0.002);
       
       // Move slightly down
-      var position = JSXna.Framework.Matrix.createTranslation(moveLeftAndRight, 0, 20 + zoomInAndOut);
+      //var position = JSXna.Framework.Matrix.createTranslation(moveLeftAndRight, 0, 20 + zoomInAndOut);
+      var position = JSXna.Framework.Matrix.createTranslation(0, 0, 20);
       
       // Move the camera around
       //var position = JSXna.Framework.Matrix.createTranslation(moveLeftAndRight, 0, 35 + moveInAndOut);
       
+      // Rotate according to angle
+      var rotateX = JSXna.Framework.Matrix.createRotationX(angleXaxis);
+      var rotateY = JSXna.Framework.Matrix.createRotationY(angleYaxis);
+      
+      // Multiply together, make sure and read them in opposite order
+      var view = JSXna.Framework.Matrix.multiply(rotateX, position);
+      view = JSXna.Framework.Matrix.multiply(rotateY, view);
+      
       // Inverse the operation for camera movements, because we are actually
       // moving geometry in the scene, not the camera itself.
-      return JSXna.Framework.Matrix.invert(position);
+      return JSXna.Framework.Matrix.invert(view);
   }
   
   simpleProjectionMatrix(scaleFactor) {
@@ -345,9 +383,9 @@ MyFirstApplication.Cube = class {
       return projection;
   }
   
-  perspectiveProjectionMatrix() {
+  perspectiveProjectionMatrix(ar) {
       var fieldOfViewInRadians = Math.PI * 0.5;
-      var aspectRatio = 640 / 480;
+      var aspectRatio = ar;
       var nearClippingPlaneDistance = 1;
       var farClippingPlaneDistance = 50;
       
