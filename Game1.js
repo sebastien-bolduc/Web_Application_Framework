@@ -15,9 +15,10 @@ document.addEventListener("JSXnaGameLoaded", classJSXnaGame1, false);
 
 JSXna.Utils.include['HTML']('/JSXna/Framework/Game.js');
 JSXna.Utils.include['HTML']('/JSXna/Framework/GraphicsDeviceManager.js');
-JSXna.Utils.include['HTML']('/JSXna/Framework/Input/Mouse.js');
-JSXna.Utils.include['HTML']('/JSXna/Framework/Rectangle.js');
 JSXna.Utils.include['HTML']('/JSXna/Framework/Matrix.js');
+JSXna.Utils.include['HTML']('/JSXna/Framework/Input/Mouse.js');
+JSXna.Utils.include['HTML']('/JSXna/Framework/Input/Keyboard.js');
+JSXna.Utils.include['HTML']('/JSXna/Framework/Rectangle.js');
 
 /**
  * My namespace for the application.
@@ -54,6 +55,9 @@ function classJSXnaGame1(e) {
             this.boxRed = undefined;
             this.cubeModel = undefined;
             
+            this.keyboardInput = undefined;
+            this.playerAxisX = undefined;
+            this.playerAxisZ = undefined;
             this.mouseInput = undefined;
             this.currentX = undefined;
             this.currentY = undefined;
@@ -75,6 +79,9 @@ function classJSXnaGame1(e) {
             this.colorsBuffer = gl.createBuffer();
             this.elementsBuffer = gl.createBuffer();
             
+            this.keyboardInput = new JSXna.Framework.Input.Keyboard();
+            this.playerAxisX = 0;
+            this.playerAxisZ = 20;
             this.mouseInput = new JSXna.Framework.Input.Mouse();
             this.currentX = this.mouseInput.GetState.X;
             this.currentY = this.mouseInput.GetState.Y;
@@ -146,10 +153,85 @@ function classJSXnaGame1(e) {
         }
 
         /**
+         * 
+         */
+        moveBackward() {
+            var view = this.cubeModel.viewMatrix(Date.now(), this.playerAxisX, this.playerAxisZ, this.angleXaxis, this.angleYaxis);
+            
+            var lenghtForward = Math.pow(view.matrix[8], 2) + Math.pow(view.matrix[9], 2) + Math.pow(view.matrix[10], 2);
+            var unitForward = [(view.matrix[8] / lenghtForward), (view.matrix[9] / lenghtForward), (view.matrix[10] / lenghtForward)];
+            //console.log(unitForward[0] + " ' " + unitForward[1] + " , " + unitForward[2]);
+            
+            this.playerAxisX -= unitForward[0] * 0.2;
+            this.playerAxisZ += unitForward[2] * 0.2;
+        }
+        
+        /**
+         * 
+         */
+        moveFoward() {
+            var view = this.cubeModel.viewMatrix(Date.now(), this.playerAxisX, this.playerAxisZ, this.angleXaxis, this.angleYaxis);
+            
+            var lenghtForward = Math.pow(view.matrix[8], 2) + Math.pow(view.matrix[9], 2) + Math.pow(view.matrix[10], 2);
+            var unitForward = [(view.matrix[8] / lenghtForward), (view.matrix[9] / lenghtForward), (view.matrix[10] / lenghtForward)];
+            //console.log(unitForward[0] + " ' " + unitForward[1] + " , " + unitForward[2]);
+            
+            this.playerAxisX += unitForward[0] * 0.2;
+            this.playerAxisZ -= unitForward[2] * 0.2;
+        }
+        
+        /**
+         * 
+         */
+        moveLeft() {
+            var view = this.cubeModel.viewMatrix(Date.now(), this.playerAxisX, this.playerAxisZ, this.angleXaxis, this.angleYaxis);
+            
+            var lenghtForward = Math.pow(view.matrix[0], 2) + Math.pow(view.matrix[1], 2) + Math.pow(view.matrix[2], 2);
+            var unitForward = [(view.matrix[0] / lenghtForward), (view.matrix[1] / lenghtForward), (view.matrix[2] / lenghtForward)];
+            //console.log(unitForward[0] + " ' " + unitForward[1] + " , " + unitForward[2]);
+            
+            this.playerAxisX -= unitForward[0] * 0.2;
+            this.playerAxisZ += unitForward[2] * 0.2;
+        }
+        
+        /**
+         * 
+         */
+        moveRight() {
+            var view = this.cubeModel.viewMatrix(Date.now(), this.playerAxisX, this.playerAxisZ, this.angleXaxis, this.angleYaxis);
+            
+            var lenghtForward = Math.pow(view.matrix[0], 2) + Math.pow(view.matrix[1], 2) + Math.pow(view.matrix[2], 2);
+            var unitForward = [(view.matrix[0] / lenghtForward), (view.matrix[1] / lenghtForward), (view.matrix[2] / lenghtForward)];
+            //console.log(unitForward[0] + " ' " + unitForward[1] + " , " + unitForward[2]);
+            
+            this.playerAxisX += unitForward[0] * 0.2;
+            this.playerAxisZ -= unitForward[2] * 0.2;
+        }
+         
+         
+        /**
          * Called when the game has determined that game logic needs to be processed.
          */
         update(gameTime) {
             var gl = this.graphics.GraphicsDevice.Adapter.DefaultAdapter;
+
+            var keyboardState = this.keyboardInput.GetState;
+            if (keyboardState.isKeyDown(keyboardState.Keys.A)) {
+                //this.playerAxisX -= 0.2;
+                this.moveLeft();
+            }
+            if (keyboardState.isKeyDown(keyboardState.Keys.D)) {
+                //this.playerAxisX += 0.2;
+                this.moveRight();
+            }
+            if (keyboardState.isKeyDown(keyboardState.Keys.S)) {
+                //this.playerAxisZ += 0.2;    // The Z axis is inverted by the projection matrix.
+                this.moveBackward();
+            }
+            if (keyboardState.isKeyDown(keyboardState.Keys.W)) {
+                //this.playerAxisZ -= 0.2;    // The Z axis is inverted by the projection matrix.
+                this.moveFoward();
+            }
 
             if (this.mouseInput.GetState.LeftButton || this.mouseInput.GetState.RightButton) {
                 this.angleXaxis += (this.mouseInput.GetState.Y - this.currentY) * 0.002;
@@ -166,10 +248,11 @@ function classJSXnaGame1(e) {
             this.currentX = this.mouseInput.GetState.X;
             this.currentY = this.mouseInput.GetState.Y;
 
-            var model = this.cubeModel.modelMatrix(Date.now());
+            //var model = this.cubeModel.modelMatrix(Date.now());
+            var model = this.cubeModel.modelMatrix(Math.PI / 4);
             //var projection = this.cubeModel.simpleProjectionMatrix(0.5);
             var projection = this.cubeModel.perspectiveProjectionMatrix(this.graphics.GraphicsDevice.Viewport.AspectRatio);
-            var view = this.cubeModel.viewMatrix(Date.now(), this.angleXaxis, this.angleYaxis);
+            var view = this.cubeModel.viewMatrix(Date.now(), this.playerAxisX, this.playerAxisZ, this.angleXaxis, this.angleYaxis);
             this.cubeModel.updateAttributesAndUniforms(this, model, view, projection);
 
             super.update(gameTime); //This is the function we override in the parent.
@@ -349,14 +432,14 @@ MyFirstApplication.Cube = class {
       return model;
   }
   
-  viewMatrix(now, angleXaxis, angleYaxis) {
+  viewMatrix(now, axisX, axisZ, angleXaxis, angleYaxis) {
       //var moveInAndOut = 20 * Math.sin(now * 0.002);
       var moveLeftAndRight = 5 * Math.sin(now * 0.0017);
       var zoomInAndOut = 5 * Math.sin(now * 0.002);
       
       // Move slightly down
       //var position = JSXna.Framework.Matrix.createTranslation(moveLeftAndRight, 0, 20 + zoomInAndOut);
-      var position = JSXna.Framework.Matrix.createTranslation(0, 0, 20);
+      var position = JSXna.Framework.Matrix.createTranslation(axisX, 0, axisZ);
       
       // Move the camera around
       //var position = JSXna.Framework.Matrix.createTranslation(moveLeftAndRight, 0, 35 + moveInAndOut);
@@ -366,9 +449,9 @@ MyFirstApplication.Cube = class {
       var rotateY = JSXna.Framework.Matrix.createRotationY(angleYaxis);
       
       // Multiply together, make sure and read them in opposite order
-      var view = JSXna.Framework.Matrix.multiply(rotateX, position);
-      view = JSXna.Framework.Matrix.multiply(rotateY, view);
-      
+      var view = JSXna.Framework.Matrix.multiply(rotateY, position);
+      view = JSXna.Framework.Matrix.multiply(rotateX, view);
+
       // Inverse the operation for camera movements, because we are actually
       // moving geometry in the scene, not the camera itself.
       return JSXna.Framework.Matrix.invert(view);
