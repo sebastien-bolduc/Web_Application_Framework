@@ -155,6 +155,27 @@ JSXna.Framework.Matrix = class {
 
         return scale;
     }
+    
+    /**
+     * Creates a new rotation matrix from a specified yaw, pitch, and roll.
+     * 
+     * @param {number} yaw - Angle of rotation, in radians, around the y-axis.
+     * @param {number} pitch - Angle of rotation, in radians, around the x-axis.
+     * @param {number} roll - Angle of rotation, in radians, around the z-axis.
+     * @returns {Matrix} A new rotation matrix with the specified yaw, pitch, and roll.
+     */
+    static createFromYawPitchRoll(yaw, pitch, roll) {
+        var rotationAroundYaxis = JSXna.Framework.Matrix.createRotationY(yaw);
+        var rotationAroundXaxis = JSXna.Framework.Matrix.createRotationX(pitch);
+        var rotationAroundZaxis = JSXna.Framework.Matrix.createRotationZ(roll);
+        var rotationMatrix = undefined;
+        
+        // Multiply together, make sure and read them in opposite order
+        rotationMatrix = JSXna.Framework.Matrix.multiply(rotationAroundXaxis, rotationAroundYaxis);
+        rotationMatrix = JSXna.Framework.Matrix.multiply(rotationAroundZaxis, rotationMatrix);
+        
+        return rotationMatrix;
+    }
 
     /**
      * Builds a perspective projection matrix based on a field of view

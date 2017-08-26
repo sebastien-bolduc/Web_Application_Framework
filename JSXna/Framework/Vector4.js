@@ -147,6 +147,27 @@ JSXna.Framework.Vector4 = class {
     static op_Multiply(item, index) {
         return item * this.vector[index];
     }
+    
+    /**
+     * Calculates the length of the vector.
+     * 
+     * @return {number} The length of the vector.
+     */
+    length() {
+        return Math.sqrt(Math.pow(this.X, 2) + Math.pow(this.Y, 2) + Math.pow(this.Z, 2) + Math.pow(this.W, 2));
+    }
+    
+    /**
+     * Creates a unit vector from the specified vector.
+     * 
+     * @param {Vector4} vector - The source Vector4.
+     * @returns {Vector4} The created unit vector.
+     */
+    static normalize(vector) {
+        var length = vector.length();
+        
+        return new JSXna.Framework.Vector4(vector.X / length, vector.Y / length, vector.Z / length, vector.W / length);
+    }
 };
 
 // Check if we already included this file...

@@ -13,6 +13,7 @@ var includeJSXnaGame1Flag = (typeof includeJSXnaGame1Flag == "undefined") ? fals
 // class.
 document.addEventListener("JSXnaGameLoaded", classJSXnaGame1, false);
 
+JSXna.Utils.include['HTML']('/JSXna/Engine/BasicEffect.js');
 JSXna.Utils.include['HTML']('/JSXna/Framework/Game.js');
 JSXna.Utils.include['HTML']('/JSXna/Framework/GraphicsDeviceManager.js');
 JSXna.Utils.include['HTML']('/JSXna/Framework/Matrix.js');
@@ -42,7 +43,7 @@ function classJSXnaGame1(e) {
             console.log(this.graphics.GraphicsDevice.Viewport.Width + " , " + this.graphics.GraphicsDevice.Viewport.Height);
             this.Content.RootDirectory = "/Content/";
 
-            this.myShader;
+            this.myShader = undefined;
             this.modelLocation = undefined;
             this.viewLocation = undefined;
             this.projectionLocation = undefined;
@@ -52,17 +53,27 @@ function classJSXnaGame1(e) {
             this.colorsBuffer = undefined;
             this.elementsBuffer = undefined;
             
-            this.boxRed = undefined;
             this.cubeModel = undefined;
             
             this.keyboardInput = undefined;
-            this.playerAxisX = undefined;
-            this.playerAxisZ = undefined;
             this.mouseInput = undefined;
-            this.currentX = undefined;
-            this.currentY = undefined;
-            this.angleXaxis = undefined;
-            this.angleYaxis = undefined;
+            
+            // Player's attributes...
+            this.player = {
+                X: undefined,
+                Y: undefined,
+                Z: undefined,
+                mouseX: undefined,
+                mouseY: undefined,
+                yaw: undefined,
+                pitch: undefined,
+                roll: undefined,
+                speed: undefined,
+                mouseSpeed: undefined
+            };
+            
+            // Basic effects for rendering...
+            this.basicEffect = undefined;
         }
 
         /**
@@ -80,13 +91,24 @@ function classJSXnaGame1(e) {
             this.elementsBuffer = gl.createBuffer();
             
             this.keyboardInput = new JSXna.Framework.Input.Keyboard();
-            this.playerAxisX = 0;
-            this.playerAxisZ = 20;
             this.mouseInput = new JSXna.Framework.Input.Mouse();
-            this.currentX = this.mouseInput.GetState.X;
-            this.currentY = this.mouseInput.GetState.Y;
-            this.angleXaxis = 0;
-            this.angleYaxis = 0;
+            
+            // Initialize player's attributes...
+            this.player.X = 0;
+            this.player.Y = 0;
+            this.player.Z = 20;
+            this.player.mouseX = this.mouseInput.GetState.X;
+            this.player.mouseY = this.mouseInput.GetState.Y;
+            this.player.yaw = 0;
+            this.player.pitch = 0;
+            this.player.roll = 0;
+            this.player.speed = 0.2;
+            this.player.mouseSpeed = 0.002;
+            
+            // Initialize our basic effects...
+            this.basicEffect = new JSXna.Engine.BasicEffect();
+            this.basicEffect.createProjection(Math.PI * 0.5, this.graphics.GraphicsDevice.Viewport.AspectRatio, 1, 50);
+            this.basicEffect.createView(new JSXna.Framework.Vector4(this.player.X, this.player.Y, this.player.Z, 0), this.player.yaw, this.player.pitch, this.player.roll);
             
             super.initialize(); //This is the function we override in the parent.
         }
@@ -107,38 +129,6 @@ function classJSXnaGame1(e) {
             this.positionLocation = gl.getAttribLocation(this.myShader, "position");
             this.colorLocation = gl.getAttribLocation(this.myShader, 'color');
             
-            // Box model.
-            /*this.boxRed = new MyFirstApplication.Box({
-                top : 0.5,
-                bottom: -0.5,
-                left: -0.5,
-                right: 0.5,
-                
-                depth: 0,
-                w: 0.7,
-                color: [1, 0.4, 0.4, 1]
-            });
-            this.boxGreen = new MyFirstApplication.Box({
-                top : 0.9,
-                bottom: -0,
-                left: -0.9,
-                right: 0.9,
-                
-                depth: 0.5,
-                w: 1.1,
-                color: [0.4, 1, 0.4, 1]
-            });
-            this.boxBlue = new MyFirstApplication.Box({
-                top : 1,
-                bottom: -1,
-                left: -1,
-                right: 1,
-                
-                depth: -1.5,
-                w: 1.5,
-                color: [0.4, 0.4, 1, 1]
-            });*/
-            
             // Cube model.
             this.cubeModel = new MyFirstApplication.Cube();
             this.cubeModel.createBuffer(this);
@@ -153,107 +143,96 @@ function classJSXnaGame1(e) {
         }
 
         /**
-         * 
+         * Move Backward.
          */
         moveBackward() {
-            var view = this.cubeModel.viewMatrix(Date.now(), this.playerAxisX, this.playerAxisZ, this.angleXaxis, this.angleYaxis);
+            var view = this.basicEffect.View;
             
-            var lenghtForward = Math.pow(view.matrix[8], 2) + Math.pow(view.matrix[9], 2) + Math.pow(view.matrix[10], 2);
-            var unitForward = [(view.matrix[8] / lenghtForward), (view.matrix[9] / lenghtForward), (view.matrix[10] / lenghtForward)];
-            //console.log(unitForward[0] + " ' " + unitForward[1] + " , " + unitForward[2]);
+            var forwardVector = new JSXna.Framework.Vector4(view.matrix[8], view.matrix[9], view.matrix[10], 0);
+            forwardVector = JSXna.Framework.Vector4.normalize(forwardVector);
             
-            this.playerAxisX -= unitForward[0] * 0.2;
-            this.playerAxisZ += unitForward[2] * 0.2;
+            this.player.X -= forwardVector.X * this.player.speed;
+            this.player.Z += forwardVector.Z * this.player.speed;
         }
         
         /**
-         * 
+         * Move forward.
          */
-        moveFoward() {
-            var view = this.cubeModel.viewMatrix(Date.now(), this.playerAxisX, this.playerAxisZ, this.angleXaxis, this.angleYaxis);
+        moveForward() {
+            var view = this.basicEffect.View;
             
-            var lenghtForward = Math.pow(view.matrix[8], 2) + Math.pow(view.matrix[9], 2) + Math.pow(view.matrix[10], 2);
-            var unitForward = [(view.matrix[8] / lenghtForward), (view.matrix[9] / lenghtForward), (view.matrix[10] / lenghtForward)];
-            //console.log(unitForward[0] + " ' " + unitForward[1] + " , " + unitForward[2]);
+            var forwardVector = new JSXna.Framework.Vector4(view.matrix[8], view.matrix[9], view.matrix[10], 0);
+            forwardVector = JSXna.Framework.Vector4.normalize(forwardVector);
             
-            this.playerAxisX += unitForward[0] * 0.2;
-            this.playerAxisZ -= unitForward[2] * 0.2;
+            this.player.X += forwardVector.X * this.player.speed;
+            this.player.Z -= forwardVector.Z * this.player.speed;
         }
         
         /**
-         * 
+         * Strafe to the left.
          */
         moveLeft() {
-            var view = this.cubeModel.viewMatrix(Date.now(), this.playerAxisX, this.playerAxisZ, this.angleXaxis, this.angleYaxis);
+            var view = this.basicEffect.View;
             
-            var lenghtForward = Math.pow(view.matrix[0], 2) + Math.pow(view.matrix[1], 2) + Math.pow(view.matrix[2], 2);
-            var unitForward = [(view.matrix[0] / lenghtForward), (view.matrix[1] / lenghtForward), (view.matrix[2] / lenghtForward)];
-            //console.log(unitForward[0] + " ' " + unitForward[1] + " , " + unitForward[2]);
+            var strafeVector = new JSXna.Framework.Vector4(view.matrix[0], view.matrix[1], view.matrix[2], 0);
+            strafeVector = JSXna.Framework.Vector4.normalize(strafeVector);
             
-            this.playerAxisX -= unitForward[0] * 0.2;
-            this.playerAxisZ += unitForward[2] * 0.2;
+            this.player.X -= strafeVector.X * this.player.speed;
+            this.player.Z += strafeVector.Z * this.player.speed;
         }
         
         /**
-         * 
+         * Stafe to the right.
          */
         moveRight() {
-            var view = this.cubeModel.viewMatrix(Date.now(), this.playerAxisX, this.playerAxisZ, this.angleXaxis, this.angleYaxis);
+            var view = this.basicEffect.View;
             
-            var lenghtForward = Math.pow(view.matrix[0], 2) + Math.pow(view.matrix[1], 2) + Math.pow(view.matrix[2], 2);
-            var unitForward = [(view.matrix[0] / lenghtForward), (view.matrix[1] / lenghtForward), (view.matrix[2] / lenghtForward)];
-            //console.log(unitForward[0] + " ' " + unitForward[1] + " , " + unitForward[2]);
+            var strafeVector = new JSXna.Framework.Vector4(view.matrix[0], view.matrix[1], view.matrix[2], 0);
+            strafeVector = JSXna.Framework.Vector4.normalize(strafeVector);
             
-            this.playerAxisX += unitForward[0] * 0.2;
-            this.playerAxisZ -= unitForward[2] * 0.2;
+            this.player.X += strafeVector.X * this.player.speed;
+            this.player.Z -= strafeVector.Z * this.player.speed;
         }
-         
          
         /**
          * Called when the game has determined that game logic needs to be processed.
          */
         update(gameTime) {
-            var gl = this.graphics.GraphicsDevice.Adapter.DefaultAdapter;
-
+            // This part handle the keyboard inputs...
             var keyboardState = this.keyboardInput.GetState;
             if (keyboardState.isKeyDown(keyboardState.Keys.A)) {
-                //this.playerAxisX -= 0.2;
                 this.moveLeft();
             }
             if (keyboardState.isKeyDown(keyboardState.Keys.D)) {
-                //this.playerAxisX += 0.2;
                 this.moveRight();
             }
             if (keyboardState.isKeyDown(keyboardState.Keys.S)) {
-                //this.playerAxisZ += 0.2;    // The Z axis is inverted by the projection matrix.
                 this.moveBackward();
             }
             if (keyboardState.isKeyDown(keyboardState.Keys.W)) {
-                //this.playerAxisZ -= 0.2;    // The Z axis is inverted by the projection matrix.
-                this.moveFoward();
+                this.moveForward();
             }
 
+            // This part handle the mouse inputs...
             if (this.mouseInput.GetState.LeftButton || this.mouseInput.GetState.RightButton) {
-                this.angleXaxis += (this.mouseInput.GetState.Y - this.currentY) * 0.002;
-                this.angleYaxis += (this.mouseInput.GetState.X - this.currentX) * 0.002;
+                this.player.pitch += (this.mouseInput.GetState.Y - this.player.mouseY) * this.player.mouseSpeed;
+                this.player.yaw += (this.mouseInput.GetState.X - this.player.mouseX) * this.player.mouseSpeed;
                 
                 // Check limit for angle on the X axis.
-                this.angleXaxis = (this.angleXaxis > (2 * Math.PI)) ? this.angleXaxis - (Math.PI * 2) : this.angleXaxis;
-                this.angleXaxis = (this.angleXaxis < 0) ? (Math.PI * 2) + this.angleXaxis : this.angleXaxis;
+                this.player.pitch = (this.player.pitch > (2 * Math.PI)) ? this.player.pitch - (Math.PI * 2) : this.player.pitch;
+                this.player.pitch = (this.player.pitch < 0) ? (Math.PI * 2) + this.player.pitch : this.player.pitch;
                 
                 // Check limit for angle on the Y axis.
-                this.angleYaxis = (this.angleYaxis > (2 * Math.PI)) ? this.angleYaxis - (Math.PI * 2) : this.angleYaxis;
-                this.angleYaxis = (this.angleYaxis < 0) ? (Math.PI * 2) + this.angleYaxis : this.angleYaxis;
+                this.player.yaw = (this.player.yaw > (2 * Math.PI)) ? this.player.yaw - (Math.PI * 2) : this.player.yaw;
+                this.player.yaw = (this.player.yaw < 0) ? (Math.PI * 2) + this.player.yaw : this.player.yaw;
             }
-            this.currentX = this.mouseInput.GetState.X;
-            this.currentY = this.mouseInput.GetState.Y;
+            this.player.mouseX = this.mouseInput.GetState.X;
+            this.player.mouseY = this.mouseInput.GetState.Y;
 
-            //var model = this.cubeModel.modelMatrix(Date.now());
+            // We create and set the transformation matrix for rendering...
             var model = this.cubeModel.modelMatrix(Math.PI / 4);
-            //var projection = this.cubeModel.simpleProjectionMatrix(0.5);
-            var projection = this.cubeModel.perspectiveProjectionMatrix(this.graphics.GraphicsDevice.Viewport.AspectRatio);
-            var view = this.cubeModel.viewMatrix(Date.now(), this.playerAxisX, this.playerAxisZ, this.angleXaxis, this.angleYaxis);
-            this.cubeModel.updateAttributesAndUniforms(this, model, view, projection);
+            this.basicEffect.createView(new JSXna.Framework.Vector4(this.player.X, this.player.Y, this.player.Z, 0), this.player.yaw, this.player.pitch, this.player.roll);
+            this.cubeModel.updateAttributesAndUniforms(this, model, this.basicEffect.View, this.basicEffect.Projection);
 
             super.update(gameTime); //This is the function we override in the parent.
         }
@@ -262,13 +241,7 @@ function classJSXnaGame1(e) {
          * Called when the game determines it is time to draw a frame.
          */
         draw(gameTime) {
-            var gl = this.graphics.GraphicsDevice.Adapter.DefaultAdapter;
-
             this.graphics.GraphicsDevice.clear();
-
-            /*this.boxRed.draw(this);
-            this.boxGreen.draw(this);
-            this.boxBlue.draw(this);*/
             
             this.cubeModel.draw(this);
 
@@ -282,52 +255,6 @@ function classJSXnaGame1(e) {
         includeJSXnaGame1Flag = true;
     }
 }
-
-MyFirstApplication.Box = class {
-    constructor(settings) {
-        this.top = settings.top;        // x
-        this.bottom = settings.bottom;  // x
-        this.left = settings.left;      // y
-        this.right = settings.right;    // y
-        
-        this.depth = settings.depth;    // z
-        this.w = settings.w;            // w
-        this.color = settings.color;
-    }
-    
-    draw(context) {
-        // Create some attribute data; these are the triangle that will end being
-        // drawn to the screen.  There are two that form a square.
-        
-        var data = new Float32Array([
-            
-            // Triangle 1
-            this.left, this.bottom, this.depth, this.w,
-            this.right, this.bottom, this.depth, this.w,
-            this.left, this.top, this.depth, this.w,
-            
-            // Triangle 2
-            this.left, this.top, this.depth, this.w,
-            this.right, this.bottom, this.depth, this.w,
-            this.right, this.top, this.depth, this.w
-        ]);
-            
-        // Use WebGL to draw this onto the screen.
-        var gl = context.graphics.GraphicsDevice.Adapter.DefaultAdapter;
-        gl.bindBuffer(gl.ARRAY_BUFFER, context.positionBuffer)
-        gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-        
-        // Setup the pointer to our attribute data (the triangles)
-        gl.enableVertexAttribArray(context.positionLocation);
-        gl.vertexAttribPointer(context.positionLocation, 4, gl.FLOAT, false, 0, 0);
-        
-        // Setup the color uniform that will be shared across all triangles
-        gl.uniform4fv(context.colorLocation, this.color);
-        
-        // Draw the triangles to the screen
-        gl.drawArrays(gl.TRIANGLES, 0, 6);
-    }
-};
 
 MyFirstApplication.Cube = class {
   constructor() {
@@ -430,49 +357,6 @@ MyFirstApplication.Cube = class {
       model = JSXna.Framework.Matrix.multiply(scale, model);
       
       return model;
-  }
-  
-  viewMatrix(now, axisX, axisZ, angleXaxis, angleYaxis) {
-      //var moveInAndOut = 20 * Math.sin(now * 0.002);
-      var moveLeftAndRight = 5 * Math.sin(now * 0.0017);
-      var zoomInAndOut = 5 * Math.sin(now * 0.002);
-      
-      // Move slightly down
-      //var position = JSXna.Framework.Matrix.createTranslation(moveLeftAndRight, 0, 20 + zoomInAndOut);
-      var position = JSXna.Framework.Matrix.createTranslation(axisX, 0, axisZ);
-      
-      // Move the camera around
-      //var position = JSXna.Framework.Matrix.createTranslation(moveLeftAndRight, 0, 35 + moveInAndOut);
-      
-      // Rotate according to angle
-      var rotateX = JSXna.Framework.Matrix.createRotationX(angleXaxis);
-      var rotateY = JSXna.Framework.Matrix.createRotationY(angleYaxis);
-      
-      // Multiply together, make sure and read them in opposite order
-      var view = JSXna.Framework.Matrix.multiply(rotateY, position);
-      view = JSXna.Framework.Matrix.multiply(rotateX, view);
-
-      // Inverse the operation for camera movements, because we are actually
-      // moving geometry in the scene, not the camera itself.
-      return JSXna.Framework.Matrix.invert(view);
-  }
-  
-  simpleProjectionMatrix(scaleFactor) {
-      var projection = JSXna.Framework.Matrix.identity();
-      
-      projection.matrix[11] = scaleFactor;
-      projection.matrix[15] = scaleFactor;
-      
-      return projection;
-  }
-  
-  perspectiveProjectionMatrix(ar) {
-      var fieldOfViewInRadians = Math.PI * 0.5;
-      var aspectRatio = ar;
-      var nearClippingPlaneDistance = 1;
-      var farClippingPlaneDistance = 50;
-      
-      return JSXna.Framework.Matrix.createPerspectiveFieldOfView(fieldOfViewInRadians, aspectRatio, nearClippingPlaneDistance, farClippingPlaneDistance);
   }
   
   updateAttributesAndUniforms(context, model, view, projection) {
