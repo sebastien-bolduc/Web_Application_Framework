@@ -14,6 +14,7 @@ var includeJSXnaGame1Flag = (typeof includeJSXnaGame1Flag == "undefined") ? fals
 document.addEventListener("JSXnaGameLoaded", classJSXnaGame1, false);
 
 JSXna.Utils.include['HTML']('/JSXna/Engine/BasicEffect.js');
+JSXna.Utils.include['HTML']('/JSXna/Framework/BoundingBox.js');
 JSXna.Utils.include['HTML']('/JSXna/Framework/Game.js');
 JSXna.Utils.include['HTML']('/JSXna/Framework/GraphicsDeviceManager.js');
 JSXna.Utils.include['HTML']('/JSXna/Framework/Matrix.js');
@@ -74,6 +75,10 @@ function classJSXnaGame1(e) {
             
             // Basic effects for rendering...
             this.basicEffect = undefined;
+            
+            // Bounding box for collision detection...
+            this.playerBoundingBox = undefined;
+            this.cubeBoundingBox = undefined;
         }
 
         /**
@@ -110,6 +115,18 @@ function classJSXnaGame1(e) {
             this.basicEffect.createProjection(Math.PI * 0.5, this.graphics.GraphicsDevice.Viewport.AspectRatio, 1, 50);
             this.basicEffect.createView(new JSXna.Framework.Vector4(this.player.X, this.player.Y, this.player.Z, 0), this.player.yaw, this.player.pitch, this.player.roll);
             
+            // Initialize our bounding box...
+            this.playerBoundingBox = new JSXna.Framework.BoundingBox(
+                new JSXna.Framework.Vector4(this.player.X - 2, this.player.Y - 2, this.player.Z - 2, 0), 
+                new JSXna.Framework.Vector4(this.player.X + 2, this.player.Y + 2, this.player.Z + 2, 0));
+            //this.cubeBoundingBox = new JSXna.Framework.BoundingBox(new JSXna.Framework.Vector4(-5, -5, -5, 0), new JSXna.Framework.Vector4(5, 5, 5, 0));
+            this.cubeBoundingBox = JSXna.Framework.BoundingBox.createFromPoints(
+                [new JSXna.Framework.Vector4(-5, -5, -5, 0),
+                new JSXna.Framework.Vector4(1, 1, 1, 0),
+                new JSXna.Framework.Vector4(-2, -1, -4, 0),
+                new JSXna.Framework.Vector4(10, 0, 0, 0),
+                new JSXna.Framework.Vector4(5, 5, 5, 0)]);
+            
             super.initialize(); //This is the function we override in the parent.
         }
 
@@ -125,7 +142,7 @@ function classJSXnaGame1(e) {
             // ...and set the attributes.
             this.modelLocation = gl.getUniformLocation(this.myShader, 'model');
             this.viewLocation = gl.getUniformLocation(this.myShader, 'view');
-            this.projectionLocation = gl.getUniformLocation(this.myShader, 'projection')
+            this.projectionLocation = gl.getUniformLocation(this.myShader, 'projection');
             this.positionLocation = gl.getAttribLocation(this.myShader, "position");
             this.colorLocation = gl.getAttribLocation(this.myShader, 'color');
             
@@ -153,6 +170,14 @@ function classJSXnaGame1(e) {
             
             this.player.X -= forwardVector.X * this.player.speed;
             this.player.Z += forwardVector.Z * this.player.speed;
+            
+            // Check for collision...
+            this.playerBoundingBox.Min = new JSXna.Framework.Vector4(this.player.X - 2, this.player.Y - 2, this.player.Z - 2, 0);
+            this.playerBoundingBox.Max = new JSXna.Framework.Vector4(this.player.X + 2, this.player.Y + 2, this.player.Z + 2, 0);
+            if (this.playerBoundingBox.intersects(this.cubeBoundingBox)) {
+                this.player.X += forwardVector.X * this.player.speed;
+                this.player.Z -= forwardVector.Z * this.player.speed;
+            }
         }
         
         /**
@@ -166,6 +191,14 @@ function classJSXnaGame1(e) {
             
             this.player.X += forwardVector.X * this.player.speed;
             this.player.Z -= forwardVector.Z * this.player.speed;
+            
+            // Check for collision...
+            this.playerBoundingBox.Min = new JSXna.Framework.Vector4(this.player.X - 2, this.player.Y - 2, this.player.Z - 2, 0);
+            this.playerBoundingBox.Max = new JSXna.Framework.Vector4(this.player.X + 2, this.player.Y + 2, this.player.Z + 2, 0);
+            if (this.playerBoundingBox.intersects(this.cubeBoundingBox)) {
+                this.player.X -= forwardVector.X * this.player.speed;
+                this.player.Z += forwardVector.Z * this.player.speed;
+            }
         }
         
         /**
@@ -179,6 +212,14 @@ function classJSXnaGame1(e) {
             
             this.player.X -= strafeVector.X * this.player.speed;
             this.player.Z += strafeVector.Z * this.player.speed;
+            
+            // Check for collision...
+            this.playerBoundingBox.Min = new JSXna.Framework.Vector4(this.player.X - 2, this.player.Y - 2, this.player.Z - 2, 0);
+            this.playerBoundingBox.Max = new JSXna.Framework.Vector4(this.player.X + 2, this.player.Y + 2, this.player.Z + 2, 0);
+            if (this.playerBoundingBox.intersects(this.cubeBoundingBox)) {
+                this.player.X += strafeVector.X * this.player.speed;
+                this.player.Z -= strafeVector.Z * this.player.speed;
+            }
         }
         
         /**
@@ -192,6 +233,14 @@ function classJSXnaGame1(e) {
             
             this.player.X += strafeVector.X * this.player.speed;
             this.player.Z -= strafeVector.Z * this.player.speed;
+            
+            // Check for collision...
+            this.playerBoundingBox.Min = new JSXna.Framework.Vector4(this.player.X - 2, this.player.Y - 2, this.player.Z - 2, 0);
+            this.playerBoundingBox.Max = new JSXna.Framework.Vector4(this.player.X + 2, this.player.Y + 2, this.player.Z + 2, 0);
+            if (this.playerBoundingBox.intersects(this.cubeBoundingBox)) {
+                this.player.X -= strafeVector.X * this.player.speed;
+                this.player.Z += strafeVector.Z * this.player.speed;
+            }
         }
          
         /**

@@ -18,7 +18,7 @@ JSXna.Utils.include['HTML']('/JSXna/Framework/Vector4.js');
 if (typeof JSXna == "undefined") {
     var JSXna = {};
 }
-if (typeof JSXna.Framework == "undefined") {
+if (typeof JSXna.Engine == "undefined") {
     JSXna.Engine = {};
 }
 
