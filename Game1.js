@@ -15,6 +15,7 @@ document.addEventListener("JSXnaGameLoaded", classJSXnaGame1, false);
 
 JSXna.Utils.include['HTML']('/JSXna/Engine/BasicEffect.js');
 JSXna.Utils.include['HTML']('/JSXna/Framework/BoundingBox.js');
+JSXna.Utils.include['HTML']('/JSXna/Framework/Color.js');
 JSXna.Utils.include['HTML']('/JSXna/Framework/Game.js');
 JSXna.Utils.include['HTML']('/JSXna/Framework/GraphicsDeviceManager.js');
 JSXna.Utils.include['HTML']('/JSXna/Framework/Matrix.js');
@@ -290,7 +291,7 @@ function classJSXnaGame1(e) {
          * Called when the game determines it is time to draw a frame.
          */
         draw(gameTime) {
-            this.graphics.GraphicsDevice.clear();
+            this.graphics.GraphicsDevice.clear(JSXna.Framework.Color.Black);
             
             this.cubeModel.draw(this);
 
@@ -346,12 +347,12 @@ MyFirstApplication.Cube = class {
     ];
   
     var colorsOfFaces = [
-      [0.3,  1.0,  1.0,  1.0],    // Front face: cyan
-      [1.0,  0.3,  0.3,  1.0],    // Back face: red
-      [0.3,  1.0,  0.3,  1.0],    // Top face: green
-      [0.3,  0.3,  1.0,  1.0],    // Bottom face: blue
-      [1.0,  1.0,  0.3,  1.0],    // Right face: yellow
-      [1.0,  0.3,  1.0,  1.0]     // Left face: purple
+      JSXna.Framework.Color.Cyan.PackedValue,    // Front face: cyan
+      JSXna.Framework.Color.Red.PackedValue,    // Back face: red
+      JSXna.Framework.Color.Green.PackedValue,    // Top face: green
+      JSXna.Framework.Color.Blue.PackedValue,    // Bottom face: blue
+      JSXna.Framework.Color.Yellow.PackedValue,    // Right face: yellow
+      JSXna.Framework.Color.Purple.PackedValue     // Left face: purple
     ];
   
     this.colors = [];

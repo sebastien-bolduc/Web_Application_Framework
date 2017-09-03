@@ -13,7 +13,7 @@ JSXna.Utils.include['HTML']('/JSXna/Framework/Vector4.js');
 /**
  * My namespace for basic effect.
  * (We take the time to check if all namespaces are already created)
- * @namespace JSXna.Framework
+ * @namespace JSXna.Engine
  */
 if (typeof JSXna == "undefined") {
     var JSXna = {};

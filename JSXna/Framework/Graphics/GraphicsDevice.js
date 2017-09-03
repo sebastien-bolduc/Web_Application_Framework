@@ -8,6 +8,7 @@ var includeJSXnaGraphicsDeviceFlag = (typeof includeJSXnaGraphicsDeviceFlag == "
  * @version 0.1
  */
 
+JSXna.Utils.include['HTML']('/JSXna/Framework/Color.js');
 JSXna.Utils.include['HTML']('/JSXna/Framework/Graphics/DisplayMode.js');
 JSXna.Utils.include['HTML']('/JSXna/Framework/Graphics/GraphicsAdapter.js');
 
@@ -57,14 +58,16 @@ JSXna.Framework.Graphics.GraphicsDevice = class {
     }
 
     /**
-     * Overloaded. Clears resource buffers.
+     * Clears resource buffers.
+     * 
+     * @param {Color} color - Set this color value in all buffers.
      */
-    clear() {
+    clear(color) {
         var gl = this.Adapter.DefaultAdapter;
 
         // Check if WebGL is available and running.
         if (gl) {
-            gl.clearColor(0.0, 0.0, 0.0, 1.0);
+            gl.clearColor(color.R, color.G, color.B, color.A);
             gl.enable(gl.DEPTH_TEST);
             gl.depthFunc(gl.LEQUAL);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
