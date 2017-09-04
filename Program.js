@@ -7,7 +7,7 @@
 
 var JSXnaLoadingInterval = undefined;
 var JSXnaLoadingStatus = 0;
-var JSXnaLoadingStatus_OK = 21;
+var JSXnaLoadingStatus_OK = 22;
 
 JSXna.Utils.include['HTML']('/Game1.js');
 

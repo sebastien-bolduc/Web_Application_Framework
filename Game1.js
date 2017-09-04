@@ -52,7 +52,10 @@ function classJSXnaGame1(e) {
             this.projectionLocation = undefined;
             this.positionLocation = undefined;
             this.colorLocation = undefined;
+            this.textureLocation = undefined;
             
+            this.cubeTexture_1 = undefined;
+            this.cubeTexture_3 = undefined;
             this.cubeModel_1 = undefined;
             this.cubeModel_2 = undefined;
             this.cubeModel_3 = undefined;
@@ -140,11 +143,18 @@ function classJSXnaGame1(e) {
             this.projectionLocation = gl.getUniformLocation(this.myShader, 'projection');
             this.positionLocation = gl.getAttribLocation(this.myShader, "position");
             this.colorLocation = gl.getAttribLocation(this.myShader, 'color');
+            this.textureLocation = gl.getAttribLocation(this.myShader, 'aTextureCoord');
+            
+            // Load our cube texture.
+            this.cubeTexture_1 = this.Content.load['Texture'](gl, this.Content.RootDirectory + "box-texture.png");
+            this.cubeTexture_3 = this.Content.load['Texture'](gl, this.Content.RootDirectory + "Tall_Grass.png");
             
             // Cubes model...
             this.cubeModel_1 = JSXna.Engine.Model.Cube.createCubeModel(gl);
+            this.cubeModel_1.setTexture(this.cubeTexture_1);
             this.cubeModel_2 = JSXna.Engine.Model.Cube.createCubeModel(gl);
             this.cubeModel_3 = JSXna.Engine.Model.Cube.createCubeModel(gl);
+            this.cubeModel_3.setTexture(this.cubeTexture_3);
             
             // ... and transformation.
             this.model_1 = JSXna.Framework.Matrix.multiply(JSXna.Framework.Matrix.createScale(5, 5, 5), JSXna.Framework.Matrix.createRotationY(Math.PI));

@@ -104,6 +104,7 @@ JSXna.Framework.Content.ContentManager.prototype.load = {
      * @param {WebGL context} gl - The WebGL context to work with.
      * @param {string} fragmentShaderUrl - Path to fragment shader file.
      * @param {string} vertexShaderUrl - Path to vertex shader file.
+     * @returns {WebGL handle} The WebGL program handle for the shaders.
      * 
      * @todo Check if we can make the operator 'this' work in that function.
      */
@@ -116,8 +117,18 @@ JSXna.Framework.Content.ContentManager.prototype.load = {
         var program = new JSXna.Framework.Graphics.Shader.ShaderProgram(gl);
         program.linkProgram(fShaderHandle, vShaderHandle);
         return program.ProgramHandle;
+    },
+    
+    /**
+     * Load a texture.
+     * 
+     * @param {WebGL context} gl - The WebGL context to work with.
+     * @param {string} sourceImageUrl - The source image for the texture.
+     * @returns {Object} A texture object.
+     */
+    ['Texture'](gl, sourceImageUrl) {
+        return JSXna.Framework.Graphics.Texture.createTexture(gl, sourceImageUrl);
     }
-
 };
 
 // Check if we already included this file...
