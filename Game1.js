@@ -16,6 +16,7 @@ document.addEventListener("JSXnaGameLoaded", classJSXnaGame1, false);
 JSXna.Utils.include['HTML']('/JSXna/Engine/BasicEffect.js');
 JSXna.Utils.include['HTML']('/JSXna/Framework/BoundingBox.js');
 JSXna.Utils.include['HTML']('/JSXna/Framework/Color.js');
+JSXna.Utils.include['HTML']('/JSXna/Engine/Model/Cube.js');
 JSXna.Utils.include['HTML']('/JSXna/Framework/Game.js');
 JSXna.Utils.include['HTML']('/JSXna/Framework/GraphicsDeviceManager.js');
 JSXna.Utils.include['HTML']('/JSXna/Framework/Matrix.js');
@@ -51,11 +52,10 @@ function classJSXnaGame1(e) {
             this.projectionLocation = undefined;
             this.positionLocation = undefined;
             this.colorLocation = undefined;
-            this.positionsBuffer = undefined;
-            this.colorsBuffer = undefined;
-            this.elementsBuffer = undefined;
             
-            this.cubeModel = undefined;
+            this.cubeModel_1 = undefined;
+            this.cubeModel_2 = undefined;
+            this.cubeModel_3 = undefined;
             
             this.keyboardInput = undefined;
             this.mouseInput = undefined;
@@ -90,11 +90,6 @@ function classJSXnaGame1(e) {
          */
         initialize() {
             // TODO: Add your initialization logic here
-            var gl = this.graphics.GraphicsDevice.Adapter.DefaultAdapter;
-            
-            this.positionsBuffer = gl.createBuffer();
-            this.colorsBuffer = gl.createBuffer();
-            this.elementsBuffer = gl.createBuffer();
             
             this.keyboardInput = new JSXna.Framework.Input.Keyboard();
             this.mouseInput = new JSXna.Framework.Input.Mouse();
@@ -125,7 +120,6 @@ function classJSXnaGame1(e) {
                 [new JSXna.Framework.Vector4(-5, -5, -5, 0),
                 new JSXna.Framework.Vector4(1, 1, 1, 0),
                 new JSXna.Framework.Vector4(-2, -1, -4, 0),
-                new JSXna.Framework.Vector4(10, 0, 0, 0),
                 new JSXna.Framework.Vector4(5, 5, 5, 0)]);
             
             super.initialize(); //This is the function we override in the parent.
@@ -147,9 +141,15 @@ function classJSXnaGame1(e) {
             this.positionLocation = gl.getAttribLocation(this.myShader, "position");
             this.colorLocation = gl.getAttribLocation(this.myShader, 'color');
             
-            // Cube model.
-            this.cubeModel = new MyFirstApplication.Cube();
-            this.cubeModel.createBuffer(this);
+            // Cubes model...
+            this.cubeModel_1 = JSXna.Engine.Model.Cube.createCubeModel(gl);
+            this.cubeModel_2 = JSXna.Engine.Model.Cube.createCubeModel(gl);
+            this.cubeModel_3 = JSXna.Engine.Model.Cube.createCubeModel(gl);
+            
+            // ... and transformation.
+            this.model_1 = JSXna.Framework.Matrix.multiply(JSXna.Framework.Matrix.createScale(5, 5, 5), JSXna.Framework.Matrix.createRotationY(Math.PI));
+            this.model_2 = JSXna.Framework.Matrix.multiply(JSXna.Framework.Matrix.createTranslation(-10, 0, 0), JSXna.Framework.Matrix.createRotationX(Math.PI/4));
+            this.model_3 = JSXna.Framework.Matrix.createTranslation(10, 0, 0);
         }
 
         /**
@@ -280,9 +280,7 @@ function classJSXnaGame1(e) {
             this.player.mouseY = this.mouseInput.GetState.Y;
 
             // We create and set the transformation matrix for rendering...
-            var model = this.cubeModel.modelMatrix(Math.PI / 4);
             this.basicEffect.createView(new JSXna.Framework.Vector4(this.player.X, this.player.Y, this.player.Z, 0), this.player.yaw, this.player.pitch, this.player.roll);
-            this.cubeModel.updateAttributesAndUniforms(this, model, this.basicEffect.View, this.basicEffect.Projection);
 
             super.update(gameTime); //This is the function we override in the parent.
         }
@@ -293,7 +291,9 @@ function classJSXnaGame1(e) {
         draw(gameTime) {
             this.graphics.GraphicsDevice.clear(JSXna.Framework.Color.Black);
             
-            this.cubeModel.draw(this);
+            this.cubeModel_1.draw(this, this.model_1, this.basicEffect.View, this.basicEffect.Projection);
+            this.cubeModel_2.draw(this, this.model_2, this.basicEffect.View, this.basicEffect.Projection);
+            this.cubeModel_3.draw(this, this.model_3, this.basicEffect.View, this.basicEffect.Projection);
 
             super.draw(gameTime); //This is the function we override in the parent.
         }
@@ -305,135 +305,3 @@ function classJSXnaGame1(e) {
         includeJSXnaGame1Flag = true;
     }
 }
-
-MyFirstApplication.Cube = class {
-  constructor() {
-      this.positions = [
-      // Front face
-      -1.0, -1.0,  1.0,
-       1.0, -1.0,  1.0,
-       1.0,  1.0,  1.0,
-      -1.0,  1.0,  1.0,
-
-      // Back face
-      -1.0, -1.0, -1.0,
-      -1.0,  1.0, -1.0,
-       1.0,  1.0, -1.0,
-       1.0, -1.0, -1.0,
-
-      // Top face
-      -1.0,  1.0, -1.0,
-      -1.0,  1.0,  1.0,
-       1.0,  1.0,  1.0,
-       1.0,  1.0, -1.0,
-
-      // Bottom face
-      -1.0, -1.0, -1.0,
-       1.0, -1.0, -1.0,
-       1.0, -1.0,  1.0,
-      -1.0, -1.0,  1.0,
-
-      // Right face
-       1.0, -1.0, -1.0,
-       1.0,  1.0, -1.0,
-       1.0,  1.0,  1.0,
-       1.0, -1.0,  1.0,
-
-      // Left face
-      -1.0, -1.0, -1.0,
-      -1.0, -1.0,  1.0,
-      -1.0,  1.0,  1.0,
-      -1.0,  1.0, -1.0
-    ];
-  
-    var colorsOfFaces = [
-      JSXna.Framework.Color.Cyan.PackedValue,    // Front face: cyan
-      JSXna.Framework.Color.Red.PackedValue,    // Back face: red
-      JSXna.Framework.Color.Green.PackedValue,    // Top face: green
-      JSXna.Framework.Color.Blue.PackedValue,    // Bottom face: blue
-      JSXna.Framework.Color.Yellow.PackedValue,    // Right face: yellow
-      JSXna.Framework.Color.Purple.PackedValue     // Left face: purple
-    ];
-  
-    this.colors = [];
-
-    for (var j=0; j<6; j++) {
-      var polygonColor = colorsOfFaces[j];
-    
-      for (var i=0; i<4; i++) {
-        this.colors = this.colors.concat( polygonColor );
-      }
-    }
-  
-    this.elements = [
-      0,  1,  2,      0,  2,  3,    // front
-      4,  5,  6,      4,  6,  7,    // back
-      8,  9,  10,     8,  10, 11,   // top
-      12, 13, 14,     12, 14, 15,   // bottom
-      16, 17, 18,     16, 18, 19,   // right
-      20, 21, 22,     20, 22, 23    // left
-    ];
-  }
-  
-  createBuffer(context) {
-      var gl = context.graphics.GraphicsDevice.Adapter.DefaultAdapter;
-      
-      gl.bindBuffer(gl.ARRAY_BUFFER, context.positionsBuffer);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.positions), gl.STATIC_DRAW);
-      
-      gl.bindBuffer(gl.ARRAY_BUFFER, context.colorsBuffer);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.colors), gl.STATIC_DRAW);
-      
-      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, context.elementsBuffer);
-      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.elements), gl.STATIC_DRAW);
-  }
-  
-  modelMatrix(now) {
-      // Scale down by 50%
-      var scale = JSXna.Framework.Matrix.createScale(5, 5, 5);
-      
-      // Rotate a slight tilt
-      var rotateX = JSXna.Framework.Matrix.createRotationX(now * 0.0003);
-      
-      // Rotate according to time
-      var rotateY = JSXna.Framework.Matrix.createRotationY(now * 0.0005);
-      
-      // Move slightly down
-      var position = JSXna.Framework.Matrix.createTranslation(0, 0, 0);
-      
-      // Multiply together, make sure and read them in opposite order
-      var model = JSXna.Framework.Matrix.multiply(rotateY, position);
-      model = JSXna.Framework.Matrix.multiply(rotateX, model);
-      model = JSXna.Framework.Matrix.multiply(scale, model);
-      
-      return model;
-  }
-  
-  updateAttributesAndUniforms(context, model, view, projection) {
-      var gl = context.graphics.GraphicsDevice.Adapter.DefaultAdapter;
-      
-      // Setup the color uniform that will be shared across all triangles
-      gl.uniformMatrix4fv(context.modelLocation, false, new Float32Array(model.matrix));
-      gl.uniformMatrix4fv(context.viewLocation, false, new Float32Array(view.matrix));
-      gl.uniformMatrix4fv(context.projectionLocation, false, new Float32Array(projection.matrix));
-      
-      // Set the position attribute
-      gl.enableVertexAttribArray(context.positionLocation);
-      gl.bindBuffer(gl.ARRAY_BUFFER, context.positionsBuffer);
-      gl.vertexAttribPointer(context.positionLocation, 3, gl.FLOAT, false, 0, 0);
-      
-      // Set the colors attribute
-      gl.enableVertexAttribArray(context.colorLocation);
-      gl.bindBuffer(gl.ARRAY_BUFFER, context.colorsBuffer);
-      gl.vertexAttribPointer(context.colorLocation, 4, gl.FLOAT, false, 0, 0);
-      
-      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, context.elementsBuffer);
-  }
-  
-  draw(context) {
-      var gl = context.graphics.GraphicsDevice.Adapter.DefaultAdapter;
-      
-      // Perform the actual draw
-      gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
-  }
-};
