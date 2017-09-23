@@ -22,6 +22,7 @@ JSXna.Utils.include['HTML']('/JSXna/Framework/GraphicsDeviceManager.js');
 JSXna.Utils.include['HTML']('/JSXna/Framework/Matrix.js');
 JSXna.Utils.include['HTML']('/JSXna/Framework/Input/Mouse.js');
 JSXna.Utils.include['HTML']('/JSXna/Framework/Input/Keyboard.js');
+JSXna.Utils.include['HTML']('/JSXna/Engine/Physics/Particle.js');
 JSXna.Utils.include['HTML']('/JSXna/Framework/Rectangle.js');
 
 /**
@@ -59,6 +60,8 @@ function classJSXnaGame1(e) {
             this.cubeModel_1 = undefined;
             this.cubeModel_2 = undefined;
             this.cubeModel_3 = undefined;
+            
+            this.physicModel_2 = undefined;
             
             this.keyboardInput = undefined;
             this.mouseInput = undefined;
@@ -124,6 +127,12 @@ function classJSXnaGame1(e) {
                 new JSXna.Framework.Vector4(1, 1, 1, 0),
                 new JSXna.Framework.Vector4(-2, -1, -4, 0),
                 new JSXna.Framework.Vector4(5, 5, 5, 0)]);
+                
+            // Initialize physic model...
+            this.physicModel_2 = new JSXna.Engine.Physics.Particle();
+            this.physicModel_2.initializeParticle(new JSXna.Framework.Vector4(-10, 0, 0, 0), new JSXna.Framework.Vector4(), 1);
+            //this.physicModel_2.applyForce("gravity", this.physicModel_2.Mass * 9.81, new JSXna.Framework.Vector4(0, -1, 0, 0));
+            //this.physicModel_2.applyForce("truster", 1000, new JSXna.Framework.Vector4(0, 1, 0, 0));
             
             super.initialize(); //This is the function we override in the parent.
         }
@@ -158,7 +167,7 @@ function classJSXnaGame1(e) {
             
             // ... and transformation.
             this.model_1 = JSXna.Framework.Matrix.multiply(JSXna.Framework.Matrix.createScale(5, 5, 5), JSXna.Framework.Matrix.createRotationY(Math.PI));
-            this.model_2 = JSXna.Framework.Matrix.multiply(JSXna.Framework.Matrix.createTranslation(-10, 0, 0), JSXna.Framework.Matrix.createRotationX(Math.PI/4));
+            this.model_2 = JSXna.Framework.Matrix.multiply(JSXna.Framework.Matrix.createRotationX(Math.PI/4), JSXna.Framework.Matrix.createTranslation(-10, 0, 0));
             this.model_3 = JSXna.Framework.Matrix.createTranslation(10, 0, 0);
         }
 
@@ -272,6 +281,12 @@ function classJSXnaGame1(e) {
             if (keyboardState.isKeyDown(keyboardState.Keys.W)) {
                 this.moveForward();
             }
+            if (keyboardState.isKeyDown(keyboardState.Keys.SPACE)) {
+                if (this.physicModel_2.Position.Y == 0) {
+                    this.physicModel_2.applyForce("gravity", 15 * this.physicModel_2.Mass * 9.8, new JSXna.Framework.Vector4(0, -1, 0, 0));
+                    this.physicModel_2.applyForce("truster", 2000, new JSXna.Framework.Vector4(0, 1, 0, 0));
+                }
+            }
 
             // This part handle the mouse inputs...
             if (this.mouseInput.GetState.LeftButton || this.mouseInput.GetState.RightButton) {
@@ -291,6 +306,18 @@ function classJSXnaGame1(e) {
 
             // We create and set the transformation matrix for rendering...
             this.basicEffect.createView(new JSXna.Framework.Vector4(this.player.X, this.player.Y, this.player.Z, 0), this.player.yaw, this.player.pitch, this.player.roll);
+
+            // We run the physic simulation...
+            this.physicModel_2.runSimulation(gameTime);
+            this.model_2 = JSXna.Framework.Matrix.multiply(JSXna.Framework.Matrix.createRotationX(Math.PI/4)
+                , JSXna.Framework.Matrix.createTranslation(this.physicModel_2.Position.X, this.physicModel_2.Position.Y, this.physicModel_2.Position.Z) );
+            if (this.physicModel_2.Position.Y > 1) {
+                this.physicModel_2.removeForce("truster");
+            } else if (this.physicModel_2.Position.Y < 0){
+                this.physicModel_2.removeForce("gravity");
+                this.physicModel_2.resetSimulation();
+                this.physicModel_2.Position.Y = 0;
+            } 
 
             super.update(gameTime); //This is the function we override in the parent.
         }

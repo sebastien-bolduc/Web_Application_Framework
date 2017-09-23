@@ -36,6 +36,7 @@ JSXna.Framework.Input.KeyboardState = class {
          * @todo This is a naive enum pattern for JavaScript...
          */
         this.Keys = {
+            SPACE: 32,
             A: 65,
             D: 68,
             S: 83,

@@ -166,7 +166,11 @@ JSXna.Framework.Vector4 = class {
     static normalize(vector) {
         var length = vector.length();
         
-        return new JSXna.Framework.Vector4(vector.X / length, vector.Y / length, vector.Z / length, vector.W / length);
+        if (length == 0) {
+            return new JSXna.Framework.Vector4();
+        } else {
+            return new JSXna.Framework.Vector4(vector.X / length, vector.Y / length, vector.Z / length, vector.W / length);
+        }
     }
 };
 
