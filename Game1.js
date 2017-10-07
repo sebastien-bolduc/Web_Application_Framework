@@ -15,6 +15,7 @@ document.addEventListener("JSXnaGameLoaded", classJSXnaGame1, false);
 
 JSXna.Utils.include['HTML']('/JSXna/Engine/BasicEffect.js');
 JSXna.Utils.include['HTML']('/JSXna/Framework/BoundingBox.js');
+JSXna.Utils.include['HTML']('/JSXna/Engine/Physics/Collision.js');
 JSXna.Utils.include['HTML']('/JSXna/Framework/Color.js');
 JSXna.Utils.include['HTML']('/JSXna/Engine/Model/Cube.js');
 JSXna.Utils.include['HTML']('/JSXna/Framework/Game.js');
@@ -84,8 +85,12 @@ function classJSXnaGame1(e) {
             this.basicEffect = undefined;
             
             // Bounding box for collision detection...
+            this.playerCollision = undefined;
             this.playerBoundingBox = undefined;
             this.cubeBoundingBox = undefined;
+            this.invisibleCubeBoundingBox_1 = undefined;
+            this.invisibleCubeBoundingBox_2 = undefined;
+            this.invisibleCubeBoundingBox_3 = undefined;
         }
 
         /**
@@ -127,6 +132,15 @@ function classJSXnaGame1(e) {
                 new JSXna.Framework.Vector4(1, 1, 1, 0),
                 new JSXna.Framework.Vector4(-2, -1, -4, 0),
                 new JSXna.Framework.Vector4(5, 5, 5, 0)]);
+            this.invisibleCubeBoundingBox_1 = new JSXna.Framework.BoundingBox(new JSXna.Framework.Vector4(-15, -5, -5, 0), new JSXna.Framework.Vector4(-5, 5, 5, 0));
+            this.invisibleCubeBoundingBox_2 = new JSXna.Framework.BoundingBox(new JSXna.Framework.Vector4(5, -5, 5, 0), new JSXna.Framework.Vector4(15, 5, 15, 0));
+            this.invisibleCubeBoundingBox_3 = new JSXna.Framework.BoundingBox(new JSXna.Framework.Vector4(5, -5, -5, 0), new JSXna.Framework.Vector4(15, 5, 5, 0));
+            this.playerCollision = new JSXna.Engine.Physics.Collision(this.playerBoundingBox);
+            this.playerCollision.add(this.cubeBoundingBox);
+            this.playerCollision.add(this.invisibleCubeBoundingBox_1);
+            this.playerCollision.add(this.invisibleCubeBoundingBox_2);
+            this.playerCollision.add(this.invisibleCubeBoundingBox_3);
+            
                 
             // Initialize physic model...
             this.physicModel_2 = new JSXna.Engine.Physics.Particle();
@@ -194,10 +208,20 @@ function classJSXnaGame1(e) {
             // Check for collision...
             this.playerBoundingBox.Min = new JSXna.Framework.Vector4(this.player.X - 2, this.player.Y - 2, this.player.Z - 2, 0);
             this.playerBoundingBox.Max = new JSXna.Framework.Vector4(this.player.X + 2, this.player.Y + 2, this.player.Z + 2, 0);
-            if (this.playerBoundingBox.intersects(this.cubeBoundingBox)) {
-                this.player.X += forwardVector.X * this.player.speed;
-                this.player.Z -= forwardVector.Z * this.player.speed;
+            //if (this.playerBoundingBox.intersects(this.cubeBoundingBox)) {
+            //    this.player.X += forwardVector.X * this.player.speed;
+            //    this.player.Z -= forwardVector.Z * this.player.speed;
+            //}
+            
+            this.playerCollision.testUpdate(this.playerBoundingBox);
+            if ((this.playerCollision.test()).length != 0) {
+                this.playerCollision.resolution(this.playerCollision.test());
+                //this.player.X -= forwardVector.X * this.player.speed;
+                //this.player.Z += forwardVector.Z * this.player.speed;
             }
+            this.playerCollision.update();
+            this.player.X = this.playerCollision.referenceBB.Min.X + ((this.playerCollision.referenceBB.Max.X - this.playerCollision.referenceBB.Min.X) / 2);
+            this.player.Z = this.playerCollision.referenceBB.Min.Z + ((this.playerCollision.referenceBB.Max.Z - this.playerCollision.referenceBB.Min.Z) / 2);
         }
         
         /**
@@ -215,10 +239,20 @@ function classJSXnaGame1(e) {
             // Check for collision...
             this.playerBoundingBox.Min = new JSXna.Framework.Vector4(this.player.X - 2, this.player.Y - 2, this.player.Z - 2, 0);
             this.playerBoundingBox.Max = new JSXna.Framework.Vector4(this.player.X + 2, this.player.Y + 2, this.player.Z + 2, 0);
-            if (this.playerBoundingBox.intersects(this.cubeBoundingBox)) {
-                this.player.X -= forwardVector.X * this.player.speed;
-                this.player.Z += forwardVector.Z * this.player.speed;
+            //if (this.playerBoundingBox.intersects(this.cubeBoundingBox)) {
+            //    this.player.X -= forwardVector.X * this.player.speed;
+            //    this.player.Z += forwardVector.Z * this.player.speed;
+            //}
+            
+            this.playerCollision.testUpdate(this.playerBoundingBox);
+            if ((this.playerCollision.test()).length != 0) {
+                this.playerCollision.resolution(this.playerCollision.test());
+                //this.player.X -= forwardVector.X * this.player.speed;
+                //this.player.Z += forwardVector.Z * this.player.speed;
             }
+            this.playerCollision.update();
+            this.player.X = this.playerCollision.referenceBB.Min.X + ((this.playerCollision.referenceBB.Max.X - this.playerCollision.referenceBB.Min.X) / 2);
+            this.player.Z = this.playerCollision.referenceBB.Min.Z + ((this.playerCollision.referenceBB.Max.Z - this.playerCollision.referenceBB.Min.Z) / 2);
         }
         
         /**
@@ -236,10 +270,20 @@ function classJSXnaGame1(e) {
             // Check for collision...
             this.playerBoundingBox.Min = new JSXna.Framework.Vector4(this.player.X - 2, this.player.Y - 2, this.player.Z - 2, 0);
             this.playerBoundingBox.Max = new JSXna.Framework.Vector4(this.player.X + 2, this.player.Y + 2, this.player.Z + 2, 0);
-            if (this.playerBoundingBox.intersects(this.cubeBoundingBox)) {
-                this.player.X += strafeVector.X * this.player.speed;
-                this.player.Z -= strafeVector.Z * this.player.speed;
+            //if (this.playerBoundingBox.intersects(this.cubeBoundingBox)) {
+            //    this.player.X += strafeVector.X * this.player.speed;
+            //    this.player.Z -= strafeVector.Z * this.player.speed;
+            //}
+            
+            this.playerCollision.testUpdate(this.playerBoundingBox);
+            if ((this.playerCollision.test()).length != 0) {
+                this.playerCollision.resolution(this.playerCollision.test());
+                //this.player.X -= forwardVector.X * this.player.speed;
+                //this.player.Z += forwardVector.Z * this.player.speed;
             }
+            this.playerCollision.update();
+            this.player.X = this.playerCollision.referenceBB.Min.X + ((this.playerCollision.referenceBB.Max.X - this.playerCollision.referenceBB.Min.X) / 2);
+            this.player.Z = this.playerCollision.referenceBB.Min.Z + ((this.playerCollision.referenceBB.Max.Z - this.playerCollision.referenceBB.Min.Z) / 2);
         }
         
         /**
@@ -257,10 +301,20 @@ function classJSXnaGame1(e) {
             // Check for collision...
             this.playerBoundingBox.Min = new JSXna.Framework.Vector4(this.player.X - 2, this.player.Y - 2, this.player.Z - 2, 0);
             this.playerBoundingBox.Max = new JSXna.Framework.Vector4(this.player.X + 2, this.player.Y + 2, this.player.Z + 2, 0);
-            if (this.playerBoundingBox.intersects(this.cubeBoundingBox)) {
-                this.player.X -= strafeVector.X * this.player.speed;
-                this.player.Z += strafeVector.Z * this.player.speed;
+            //if (this.playerBoundingBox.intersects(this.cubeBoundingBox)) {
+            //    this.player.X -= strafeVector.X * this.player.speed;
+            //    this.player.Z += strafeVector.Z * this.player.speed;
+            //}
+            
+            this.playerCollision.testUpdate(this.playerBoundingBox);
+            if ((this.playerCollision.test()).length != 0) {
+                this.playerCollision.resolution(this.playerCollision.test());
+                //this.player.X -= forwardVector.X * this.player.speed;
+                //this.player.Z += forwardVector.Z * this.player.speed;
             }
+            this.playerCollision.update();
+            this.player.X = this.playerCollision.referenceBB.Min.X + ((this.playerCollision.referenceBB.Max.X - this.playerCollision.referenceBB.Min.X) / 2);
+            this.player.Z = this.playerCollision.referenceBB.Min.Z + ((this.playerCollision.referenceBB.Max.Z - this.playerCollision.referenceBB.Min.Z) / 2);
         }
          
         /**

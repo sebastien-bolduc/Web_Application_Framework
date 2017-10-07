@@ -117,9 +117,13 @@ JSXna.Framework.BoundingBox = class {
      * @returns {boolean} True if the BoundingBoxs intersect; false otherwise.
      */
     intersects(box) {
-        return (this.Min.X <= box.Max.X && this.Max.X >= box.Min.X) &&
+        /*return (this.Min.X <= box.Max.X && this.Max.X >= box.Min.X) &&
                (this.Min.Y <= box.Max.Y && this.Max.Y >= box.Min.Y) &&
-               (this.Min.Z <= box.Max.Z && this.Max.Z >= box.Min.Z);
+               (this.Min.Z <= box.Max.Z && this.Max.Z >= box.Min.Z);*/
+               
+        return (this.Min.X < box.Max.X && this.Max.X > box.Min.X) &&
+               (this.Min.Y < box.Max.Y && this.Max.Y > box.Min.Y) &&
+               (this.Min.Z < box.Max.Z && this.Max.Z > box.Min.Z);
     }
 };
 
